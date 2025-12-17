@@ -1,0 +1,273 @@
+<script setup>
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import { formatDate } from '@/utils/dateFormat';
+
+const props = defineProps({
+    items: Object,
+    stats: Object,
+    filters: Object,
+});
+
+const search = ref(props.filters?.search ?? '');
+const activeStatus = ref(props.filters?.status ?? '');
+
+const submitSearch = () => {
+    router.get(
+        route('items.index'),
+        { search: search.value, status: activeStatus.value || undefined },
+        { preserveState: true, replace: true },
+    );
+};
+
+const setStatusFilter = (status) => {
+    activeStatus.value = status;
+    router.get(
+        route('items.index'),
+        { search: search.value, status: status || undefined },
+        { preserveState: true, replace: true },
+    );
+};
+
+const deleteItem = (id) => {
+    if (confirm('Are you sure you want to delete this item?')) {
+        router.delete(route('items.destroy', id), { preserveScroll: true });
+    }
+};
+</script>
+
+<template>
+    <Head title="Inventory List" />
+
+    <AuthenticatedLayout>
+        <template #header>
+            <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                <div>
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
+                        Inventory
+                    </p>
+                    <h1 class="text-2xl font-semibold leading-tight text-slate-900 dark:text-slate-50">
+                        Inventory List
+                    </h1>
+                </div>
+                <Link
+                    :href="route('items.create')"
+                    class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-sky-600 to-blue-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-sky-700 dark:to-blue-800"
+                >
+                    <i class="fa-solid fa-plus"></i>
+                    <span>New item</span>
+                </Link>
+            </div>
+        </template>
+
+        <div class="py-6">
+            <div class="mx-auto max-w-7xl space-y-4 sm:px-6 lg:px-8">
+                <div class="grid gap-4 md:grid-cols-4">
+                    <div
+                        class="overflow-hidden rounded-xl border border-amber-200/50 bg-gradient-to-br from-amber-100/60 via-orange-50/40 to-yellow-100/50 p-4 text-left shadow-md dark:border-amber-900/30 dark:bg-gradient-to-br dark:from-amber-950/40 dark:via-slate-900/60 dark:to-yellow-950/40"
+                        :class="{ 'ring-2 ring-amber-500/70': !activeStatus }"
+                    >
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-medium uppercase tracking-wide text-slate-600 dark:text-slate-400">
+                                Total items
+                            </p>
+                            <span class="text-amber-600 dark:text-amber-400">
+                                <i class="fa-solid fa-box text-lg"></i>
+                            </span>
+                        </div>
+                        <p class="mt-3 text-2xl font-semibold text-slate-900 dark:text-slate-50">
+                            {{ stats.total ?? 0 }}
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        class="overflow-hidden rounded-xl border border-emerald-200/50 bg-gradient-to-br from-emerald-100/60 via-green-50/40 to-teal-100/50 p-4 text-left shadow-md transition hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-400/70 dark:border-emerald-900/30 dark:bg-gradient-to-br dark:from-emerald-950/40 dark:via-slate-900/60 dark:to-teal-950/40"
+                        :class="{ 'ring-2 ring-emerald-500/70': activeStatus === 'available' }"
+                        @click="setStatusFilter('available')"
+                    >
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-medium uppercase tracking-wide text-slate-600 dark:text-slate-400">
+                                Available
+                            </p>
+                            <span class="text-emerald-600 dark:text-emerald-400">
+                                <i class="fa-solid fa-check-circle text-lg"></i>
+                            </span>
+                        </div>
+                        <p class="mt-3 text-2xl font-semibold text-slate-900 dark:text-slate-50">
+                            {{ stats.available ?? 0 }}
+                        </p>
+                    </button>
+                    <button
+                        type="button"
+                        class="overflow-hidden rounded-xl border border-rose-200/50 bg-gradient-to-br from-rose-100/60 via-red-50/40 to-pink-100/50 p-4 text-left shadow-md transition hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-rose-400/70 dark:border-rose-900/30 dark:bg-gradient-to-br dark:from-rose-950/40 dark:via-slate-900/60 dark:to-pink-950/40"
+                        :class="{ 'ring-2 ring-rose-500/70': activeStatus === 'damaged' }"
+                        @click="setStatusFilter('damaged')"
+                    >
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-medium uppercase tracking-wide text-slate-600 dark:text-slate-400">
+                                Damaged
+                            </p>
+                            <span class="text-rose-600 dark:text-rose-400">
+                                <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                            </span>
+                        </div>
+                        <p class="mt-3 text-2xl font-semibold text-slate-900 dark:text-slate-50">
+                            {{ stats.damaged ?? 0 }}
+                        </p>
+                    </button>
+                    <button
+                        type="button"
+                        class="overflow-hidden rounded-xl border border-amber-200/50 bg-gradient-to-br from-yellow-100/60 via-amber-50/40 to-orange-100/50 p-4 text-left shadow-md transition hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-400/70 dark:border-yellow-900/30 dark:bg-gradient-to-br dark:from-yellow-950/40 dark:via-slate-900/60 dark:to-orange-950/40"
+                        :class="{ 'ring-2 ring-yellow-500/70': activeStatus === 'daghma' }"
+                        @click="setStatusFilter('daghma')"
+                    >
+                        <div class="flex items-center justify-between">
+                            <p class="text-xs font-medium uppercase tracking-wide text-slate-600 dark:text-slate-400">
+                                Daghma
+                            </p>
+                            <span class="text-yellow-600 dark:text-yellow-400">
+                                <i class="fa-solid fa-warning text-lg"></i>
+                            </span>
+                        </div>
+                        <p class="mt-3 text-2xl font-semibold text-slate-900 dark:text-slate-50">
+                            {{ stats.daghma ?? 0 }}
+                        </p>
+                    </button>
+                </div>
+
+                <div class="rounded-xl border border-slate-200/50 bg-white/70 p-4 shadow-md dark:border-slate-700/50 dark:bg-slate-900/70 dark:backdrop-blur">
+                    <div class="flex items-center justify-between gap-4">
+                        <div class="flex-1">
+                            <input
+                                v-model="search"
+                                type="text"
+                                placeholder="Quick search by ID, tag, name, category..."
+                                class="block w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 placeholder-slate-500 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-50 dark:placeholder-slate-400 dark:focus:border-sky-400"
+                                @keyup.enter="submitSearch"
+                            />
+                        </div>
+                        <button
+                            type="button"
+                            class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-sky-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-blue-700 dark:to-sky-700"
+                            @click="submitSearch"
+                        >
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <span>Search</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-hidden rounded-xl border border-slate-200/50 bg-white/70 shadow-md dark:border-slate-700/50 dark:bg-slate-900/70">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100 dark:border-slate-700 dark:from-slate-900 dark:to-slate-800">
+                                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">#</th>
+                                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Name</th>
+                                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Model</th>
+                                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Tag Number</th>
+                                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Type</th>
+                                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Owner Name</th>
+                                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Purchase Date</th>
+                                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Status</th>
+                                    <th class="px-4 py-3 text-right font-semibold text-slate-900 dark:text-slate-50">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                                <tr
+                                    v-for="(item, index) in items.data"
+                                    :key="item.id"
+                                    class="bg-white transition hover:bg-slate-50 dark:bg-slate-900/50 dark:hover:bg-slate-800/50"
+                                >
+                                    <td class="px-4 py-3 text-slate-700 dark:text-slate-300">{{ (items.current_page - 1) * items.per_page + index + 1 }}</td>
+                                    <td class="px-4 py-3 font-medium text-slate-900 dark:text-slate-50">{{ item.name }}</td>
+                                    <td class="px-4 py-3 text-slate-700 dark:text-slate-300">{{ item.model || '-' }}</td>
+                                    <td class="px-4 py-3 text-slate-700 dark:text-slate-300">{{ item.tag_number || '-' }}</td>
+                                    <td class="px-4 py-3 text-slate-700 dark:text-slate-300">{{ item.category?.name || '-' }}</td>
+                                    <td class="px-4 py-3 text-slate-700 dark:text-slate-300">{{ item.project?.name || 'Unassigned' }}</td>
+                                    <td class="px-4 py-3 text-slate-700 dark:text-slate-300">{{ item.purchase_date ? formatDate(item.purchase_date) : '-' }}</td>
+                                    <td class="px-4 py-3">
+                                        <span
+                                            class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap"
+                                            :class="{
+                                                'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300': item.status?.slug === 'active',
+                                                'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300': item.status?.slug === 'daghma',
+                                                'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300': item.status?.is_damaged,
+                                                'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300': !item.status,
+                                            }"
+                                        >
+                                            {{ item.status?.name ?? 'Unknown' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3 text-right">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <Link
+                                                :href="route('items.show', item.id)"
+                                                class="inline-flex items-center gap-1 rounded-md bg-sky-100 px-2 py-1 text-xs font-medium text-sky-700 transition hover:bg-sky-200 dark:bg-sky-900/40 dark:text-sky-300 dark:hover:bg-sky-900/60"
+                                            >
+                                                <i class="fa-solid fa-eye text-xs"></i>
+                                                <span>View</span>
+                                            </Link>
+                                            <Link
+                                                :href="route('items.edit', item.id)"
+                                                class="inline-flex items-center gap-1 rounded-md bg-slate-200 px-2 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+                                            >
+                                                <i class="fa-solid fa-pen text-xs"></i>
+                                                <span>Edit</span>
+                                            </Link>
+                                            <button
+                                                type="button"
+                                                @click="deleteItem(item.id)"
+                                                class="inline-flex items-center gap-1 rounded-md bg-rose-100 px-2 py-1 text-xs font-medium text-rose-700 transition hover:bg-rose-200 dark:bg-rose-900/40 dark:text-rose-300 dark:hover:bg-rose-900/60"
+                                            >
+                                                <i class="fa-solid fa-trash text-xs"></i>
+                                                <span>Delete</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr v-if="!items.data.length">
+                                    <td colspan="9" class="px-4 py-8 text-center text-slate-500 dark:text-slate-400">
+                                        <i class="fa-solid fa-inbox text-2xl mb-2 block opacity-50"></i>
+                                        No items found.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between rounded-xl border border-slate-200/50 bg-white/70 p-4 text-xs text-slate-600 shadow-md dark:border-slate-700/50 dark:bg-slate-900/70 dark:text-slate-400">
+                    <div>
+                        Showing
+                        <span class="font-semibold text-slate-900 dark:text-slate-50">{{ items.from ?? 0 }}</span>
+                        to
+                        <span class="font-semibold text-slate-900 dark:text-slate-50">{{ items.to ?? 0 }}</span>
+                        of
+                        <span class="font-semibold text-slate-900 dark:text-slate-50">{{ items.total }}</span>
+                        results
+                    </div>
+                    <div class="flex gap-2">
+                        <button
+                            type="button"
+                            class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                            :disabled="!items.prev_page_url"
+                            @click="router.get(items.prev_page_url)"
+                        >
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <button
+                            type="button"
+                            class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                            :disabled="!items.next_page_url"
+                            @click="router.get(items.next_page_url)"
+                        >
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </AuthenticatedLayout>
+</template>

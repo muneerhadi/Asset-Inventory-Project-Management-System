@@ -1,0 +1,6 @@
+employee_code,name,position,email,phone,location,address
+EMP001,John Smith,Project Manager,john.smith@company.com,+1-555-0101,New York,123 Main Street
+EMP002,Sarah Johnson,Developer,sarah.johnson@company.com,+1-555-0102,New York,456 Oak Avenue
+EMP003,Mike Davis,QA Engineer,mike.davis@company.com,+1-555-0103,Boston,789 Pine Road
+EMP004,Emma Wilson,Business Analyst,emma.wilson@company.com,+1-555-0104,New York,321 Elm Street
+EMP005,Robert Brown,Senior Developer,robert.brown@company.com,+1-555-0105,Boston,654 Maple Lane

@@ -1,0 +1,6 @@
+item_code,tag_number,name,description,category,status,price,currency,purchase_date,location,sublocation,model,depreciation_rate,remarks
+ITEM-001,AT-00001,Dell Laptop,Professional laptop for development,Electronics,active,1500.00,USD,2024-01-15,Office,Desk A,Dell XPS 13,20,In excellent condition
+ITEM-002,AT-00002,Office Chair,Ergonomic executive chair,Furniture,active,450.00,USD,2024-02-01,Warehouse,Shelf B3,Steelcase Leap,10,Minor scratch on armrest
+ITEM-003,AT-00003,Network Printer,HP LaserJet color printer,Electronics,inactive,2500.00,USD,2023-06-10,Office,Corridor,HP LaserJet Pro M454dn,15,Currently not in use
+ITEM-004,AT-00004,Standing Desk,Height adjustable desk,Furniture,active,800.00,USD,2024-03-05,Office,Desk B,FlexiDesk Pro,12,Works perfectly
+ITEM-005,AT-00005,Monitor,4K UltraWide Display,Electronics,active,600.00,USD,2024-01-20,Office,Desk A,Dell U3821DW,18,No dead pixels
