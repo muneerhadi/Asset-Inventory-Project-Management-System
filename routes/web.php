@@ -75,6 +75,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:super_admin')->group(function () {
         Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
         Route::post('settings/categories', [SettingsController::class, 'storeCategory'])->name('settings.categories.store');
+        Route::put('settings/categories/{category}/toggle', [SettingsController::class, 'toggleCategory'])->name('settings.categories.toggle');
         Route::delete('settings/categories/{category}', [SettingsController::class, 'destroyCategory'])->name('settings.categories.destroy');
 
         Route::post('settings/statuses', [SettingsController::class, 'storeStatus'])->name('settings.statuses.store');

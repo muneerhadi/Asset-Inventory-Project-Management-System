@@ -143,18 +143,6 @@ watch(
                                 </select>
                             </div>
 
-                            <div class="flex flex-col">
-                                <label class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                                    <i class="fa-solid fa-barcode mr-1 text-slate-600 dark:text-slate-400"></i>
-                                    Item Code
-                                </label>
-                                <input
-                                    v-model="localFilters.item_code"
-                                    type="text"
-                                    placeholder="e.g. ITM-001"
-                                    class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition placeholder-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50 dark:placeholder-slate-500"
-                                />
-                            </div>
 
                             <div class="flex flex-col">
                                 <label class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
@@ -211,10 +199,6 @@ watch(
                                             Project
                                         </th>
                                         <th class="px-6 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">
-                                            <i class="fa-solid fa-barcode mr-2 text-slate-600 dark:text-slate-400"></i>
-                                            Code
-                                        </th>
-                                        <th class="px-6 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">
                                             <i class="fa-solid fa-box mr-2 text-slate-600 dark:text-slate-400"></i>
                                             Name
                                         </th>
@@ -249,9 +233,6 @@ watch(
                                     >
                                         <td class="px-6 py-4 text-slate-600 dark:text-slate-400">
                                             {{ item.project?.code || '-' }}
-                                        </td>
-                                        <td class="px-6 py-4 font-medium text-slate-900 dark:text-slate-50">
-                                            {{ item.item_code }}
                                         </td>
                                         <td class="px-6 py-4 text-slate-700 dark:text-slate-300">
                                             {{ item.name }}
@@ -319,9 +300,8 @@ watch(
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="item in items" :key="item.id" class="border border-slate-900">
+                                    <tr v-for="item in items" :key="item.id" class="border border-slate-900">
                                     <td class="border border-slate-900 px-3 py-2 text-black">{{ item.project?.code || '-' }}</td>
-                                    <td class="border border-slate-900 px-3 py-2 text-black">{{ item.item_code }}</td>
                                     <td class="border border-slate-900 px-3 py-2 text-black">{{ item.name }}</td>
                                     <td class="border border-slate-900 px-3 py-2 text-black">{{ item.status?.name || '-' }}</td>
                                     <td class="border border-slate-900 px-3 py-2 text-black">{{ formatDate(item.purchase_date) }}</td>

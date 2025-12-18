@@ -50,24 +50,8 @@ const submit = () => {
                         <div class="grid gap-6 md:grid-cols-2">
                             <div>
                                 <label class="block text-sm font-semibold text-slate-900 dark:text-slate-50">
-                                    <i class="fa-solid fa-code mr-2 text-sky-600 dark:text-sky-400"></i>
-                                    Project ID / Code
-                                </label>
-                                <input
-                                    v-model="form.code"
-                                    type="text"
-                                    class="mt-2 block w-full rounded-lg border-2 border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 transition-all focus:border-sky-500 focus:outline-none focus:ring-4 focus:ring-sky-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50 dark:focus:border-sky-400"
-                                    required
-                                />
-                                <p v-if="form.errors.code" class="mt-2 text-xs text-rose-600 dark:text-rose-400">
-                                    <i class="fa-solid fa-circle-exclamation mr-1"></i>
-                                    {{ form.errors.code }}
-                                </p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-slate-900 dark:text-slate-50">
                                     <i class="fa-solid fa-heading mr-2 text-sky-600 dark:text-sky-400"></i>
-                                    Name
+                                    Name <span class="text-rose-500">*</span>
                                 </label>
                                 <input
                                     v-model="form.name"
@@ -86,12 +70,13 @@ const submit = () => {
                             <div>
                                 <label class="block text-sm font-semibold text-slate-900 dark:text-slate-50">
                                     <i class="fa-solid fa-calendar-check mr-2 text-emerald-600 dark:text-emerald-400"></i>
-                                    Start date
+                                    Start date <span class="text-rose-500">*</span>
                                 </label>
                                 <input
                                     v-model="form.start_date"
                                     type="date"
                                     class="mt-2 block w-full rounded-lg border-2 border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 transition-all focus:border-sky-500 focus:outline-none focus:ring-4 focus:ring-sky-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50 dark:focus:border-sky-400"
+                                    required
                                 />
                                 <p v-if="form.errors.start_date" class="mt-2 text-xs text-rose-600 dark:text-rose-400">
                                     <i class="fa-solid fa-circle-exclamation mr-1"></i>
@@ -101,12 +86,13 @@ const submit = () => {
                             <div>
                                 <label class="block text-sm font-semibold text-slate-900 dark:text-slate-50">
                                     <i class="fa-solid fa-calendar-xmark mr-2 text-amber-600 dark:text-amber-400"></i>
-                                    End date
+                                    End date <span class="text-rose-500">*</span>
                                 </label>
                                 <input
                                     v-model="form.end_date"
                                     type="date"
                                     class="mt-2 block w-full rounded-lg border-2 border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 transition-all focus:border-sky-500 focus:outline-none focus:ring-4 focus:ring-sky-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50 dark:focus:border-sky-400"
+                                    required
                                 />
                                 <p v-if="form.errors.end_date" class="mt-2 text-xs text-rose-600 dark:text-rose-400">
                                     <i class="fa-solid fa-circle-exclamation mr-1"></i>

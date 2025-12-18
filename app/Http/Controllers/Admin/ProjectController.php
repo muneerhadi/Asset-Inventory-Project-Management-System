@@ -65,10 +65,10 @@ class ProjectController extends Controller
         $user = $request->user();
 
         $validated = $request->validate([
-            'code' => ['required', 'string', 'max:255', 'unique:projects,code'],
+            'code' => ['nullable', 'string', 'max:255', 'unique:projects,code'],
             'name' => ['required', 'string', 'max:255'],
-'start_date' => ['nullable', 'date'],
-            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'start_date' => ['required', 'date'],
+            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
             'description' => ['nullable', 'string'],
             'logo' => ['nullable', 'image', 'max:2048'],
         ]);
@@ -427,6 +427,14 @@ class ProjectController extends Controller
             if ($categoryName) {
                 $category = ItemCategory::firstOrCreate(['name' => $categoryName]);
             }
+            
+            // If no category found, get the first available category or create a default one
+            if (! $category) {
+                $category = ItemCategory::first();
+                if (! $category) {
+                    $category = ItemCategory::create(['name' => 'General']);
+                }
+            }
 
             $status = null;
             if ($statusName) {
@@ -437,6 +445,11 @@ class ProjectController extends Controller
             if (! $status) {
                 $status = ItemStatus::where('is_default', true)->first()
                     ?? ItemStatus::first();
+            }
+            
+            // Ensure we have a status
+            if (! $status) {
+                $status = ItemStatus::create(['name' => 'Active', 'slug' => 'active', 'is_default' => true]);
             }
 
             $currency = null;
@@ -452,8 +465,8 @@ class ProjectController extends Controller
                     'tag_number' => $tagNumber ?: $identifier,
                     'name' => $name,
                     'description' => $get('specification', 'description', 'Description'),
-                    'item_category_id' => optional($category)->id,
-                    'item_status_id' => optional($status)->id,
+                    'item_category_id' => $category->id,
+                    'item_status_id' => $status->id,
                     'price' => ($price = $get('price', 'Price')) !== null ? (float) $price : null,
                     'currency_id' => optional($currency)->id,
                     'depreciation_rate' => null,

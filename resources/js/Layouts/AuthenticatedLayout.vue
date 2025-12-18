@@ -80,7 +80,7 @@ const toggleTheme = () => {
                         :href="route('items.index')"
                         :active="route().current('items.*')"
                     >
-                        Items
+                        Inventory List
                     </ResponsiveNavLink>
                     <ResponsiveNavLink
                         :href="route('employees.index')"
@@ -92,7 +92,7 @@ const toggleTheme = () => {
                         :href="route('projects.index')"
                         :active="route().current('projects.*')"
                     >
-                        Projects
+                        Owners
                     </ResponsiveNavLink>
                     <ResponsiveNavLink
                         :href="route('reports.index')"
@@ -276,7 +276,7 @@ const toggleTheme = () => {
                             :href="route('items.index')"
                             :active="route().current('items.*')"
                         >
-                            Items
+                            Inventory List
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
                             :href="route('employees.index')"
@@ -288,7 +288,7 @@ const toggleTheme = () => {
                             :href="route('projects.index')"
                             :active="route().current('projects.*')"
                         >
-                            Projects
+                            Owners
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
                             :href="route('reports.index')"

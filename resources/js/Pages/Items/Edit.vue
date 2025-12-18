@@ -15,6 +15,7 @@ const props = defineProps({
 const imagePreviews = ref([]);
 const maxImages = 4;
 const maxImageSize = 20 * 1024 * 1024; // 20MB
+const imagesToKeep = ref([]); // Track which existing images to keep
 
 // Get existing images from item
 const existingImages = computed(() => {
@@ -29,11 +30,13 @@ const existingImages = computed(() => {
 
 // Initialize image previews with existing images
 existingImages.value.forEach(img => {
-    imagePreviews.value.push({
+    const imageObj = {
         type: 'existing',
         url: resolveImage(img),
         path: img
-    });
+    };
+    imagePreviews.value.push(imageObj);
+    imagesToKeep.value.push(img); // Track existing images to keep
 });
 
 const form = useForm({
@@ -53,6 +56,7 @@ const form = useForm({
     project_id: props.item.project_id ?? null,
     remarks: props.item.remarks ?? '',
     images: [],
+    images_to_keep: [], // Track which existing images to keep
 });
 
 const handleImageUpload = (event) => {
@@ -90,12 +94,21 @@ const removeImage = (index) => {
         if (fileIndex !== -1) {
             form.images.splice(fileIndex, 1);
         }
+    } else if (preview.type === 'existing') {
+        // Remove from images_to_keep array
+        const keepIndex = imagesToKeep.value.findIndex(path => path === preview.path);
+        if (keepIndex !== -1) {
+            imagesToKeep.value.splice(keepIndex, 1);
+        }
     }
     // Remove from previews
     imagePreviews.value.splice(index, 1);
 };
 
 const submit = () => {
+    // Include images_to_keep in the form data
+    form.images_to_keep = imagesToKeep.value;
+    
     form.transform((data) => ({
         ...data,
         _method: 'put',

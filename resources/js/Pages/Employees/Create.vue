@@ -102,12 +102,13 @@ const submit = () => {
                             <div>
                                 <label class="block text-sm font-semibold text-slate-900 dark:text-slate-50">
                                     <i class="fa-solid fa-envelope mr-2 text-blue-600 dark:text-blue-400"></i>
-                                    Email
+                                    Email <span class="text-rose-500">*</span>
                                 </label>
                                 <input
                                     v-model="form.email"
                                     type="email"
                                     class="mt-2 block w-full rounded-lg border-2 border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 transition-all focus:border-sky-500 focus:outline-none focus:ring-4 focus:ring-sky-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50 dark:focus:border-sky-400"
+                                    required
                                 />
                                 <p v-if="form.errors.email" class="mt-2 text-xs text-rose-600 dark:text-rose-400">
                                     <i class="fa-solid fa-circle-exclamation mr-1"></i>
@@ -117,12 +118,13 @@ const submit = () => {
                             <div>
                                 <label class="block text-sm font-semibold text-slate-900 dark:text-slate-50">
                                     <i class="fa-solid fa-phone mr-2 text-emerald-600 dark:text-emerald-400"></i>
-                                    Phone
+                                    Phone <span class="text-rose-500">*</span>
                                 </label>
                                 <input
                                     v-model="form.phone"
                                     type="text"
                                     class="mt-2 block w-full rounded-lg border-2 border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 transition-all focus:border-sky-500 focus:outline-none focus:ring-4 focus:ring-sky-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50 dark:focus:border-sky-400"
+                                    required
                                 />
                                 <p v-if="form.errors.phone" class="mt-2 text-xs text-rose-600 dark:text-rose-400">
                                     <i class="fa-solid fa-circle-exclamation mr-1"></i>

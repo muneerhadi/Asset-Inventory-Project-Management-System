@@ -35,11 +35,25 @@ class SettingsController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', 'unique:item_categories,name'],
             'description' => ['nullable', 'string'],
+            'is_active' => ['nullable', 'boolean'],
         ]);
+
+        $validated['is_active'] = (bool) ($validated['is_active'] ?? true);
 
         ItemCategory::create($validated);
 
         return redirect()->route('settings.index')->with('success', 'Category created.');
+    }
+
+    public function toggleCategory(Request $request, ItemCategory $category): RedirectResponse
+    {
+        $validated = $request->validate([
+            'is_active' => ['required', 'boolean'],
+        ]);
+
+        $category->update(['is_active' => $validated['is_active']]);
+
+        return redirect()->route('settings.index')->with('success', 'Category updated.');
     }
 
     public function destroyCategory(ItemCategory $category): RedirectResponse
@@ -53,16 +67,11 @@ class SettingsController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'slug' => ['required', 'string', 'max:255', 'unique:item_statuses,slug'],
             'description' => ['nullable', 'string'],
-            'is_default' => ['nullable', 'boolean'],
-            'is_available' => ['nullable', 'boolean'],
-            'is_damaged' => ['nullable', 'boolean'],
         ]);
 
-        $validated['is_default'] = (bool) ($validated['is_default'] ?? false);
-        $validated['is_available'] = (bool) ($validated['is_available'] ?? false);
-        $validated['is_damaged'] = (bool) ($validated['is_damaged'] ?? false);
+        // Auto-generate slug from name
+        $validated['slug'] = \Illuminate\Support\Str::slug($validated['name']);
 
         ItemStatus::create($validated);
 

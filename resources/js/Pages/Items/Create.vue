@@ -122,12 +122,13 @@ const submit = () => {
                             <div class="grid gap-4 md:grid-cols-2">
                                 <div>
                                     <label class="block text-xs font-medium uppercase tracking-wide text-slate-600 dark:text-slate-400">
-                                        Tag number
+                                        Tag number <span class="text-rose-500">*</span>
                                     </label>
                                     <input
                                         v-model="form.tag_number"
                                         type="text"
                                         class="mt-2 block w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-500 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-50 dark:placeholder-slate-400 dark:focus:border-sky-400"
+                                        required
                                     />
                                     <p v-if="form.errors.tag_number" class="mt-1 text-xs text-rose-600 dark:text-rose-400">
                                         {{ form.errors.tag_number }}
@@ -248,7 +249,7 @@ const submit = () => {
                         <div class="grid gap-4 md:grid-cols-3">
                             <div>
                                 <label class="block text-xs font-medium uppercase tracking-wide text-slate-600 dark:text-slate-400">
-                                    Price
+                                    Price <span class="text-rose-500">*</span>
                                 </label>
                                 <input
                                     v-model="form.price"
@@ -256,6 +257,7 @@ const submit = () => {
                                     step="0.01"
                                     min="0"
                                     class="mt-2 block w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-500 transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-50 dark:placeholder-slate-400 dark:focus:border-emerald-400"
+                                    required
                                 />
                                 <p v-if="form.errors.price" class="mt-1 text-xs text-rose-600 dark:text-rose-400">
                                     {{ form.errors.price }}

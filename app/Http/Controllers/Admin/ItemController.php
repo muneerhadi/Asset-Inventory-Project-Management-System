@@ -85,7 +85,7 @@ class ItemController extends Controller
             : $user->projects()->orderBy('name')->get(['projects.id', 'projects.name']);
 
         return Inertia::render('Items/Create', [
-            'categories' => ItemCategory::orderBy('name')->get(),
+            'categories' => ItemCategory::where('is_active', true)->orderBy('name')->get(),
             'statuses' => ItemStatus::orderBy('name')->get(),
             'currencies' => Currency::orderBy('code')->get(),
             'projects' => $projectOptions,
@@ -97,12 +97,12 @@ class ItemController extends Controller
         $user = $request->user();
 
         $validated = $request->validate([
-            'tag_number' => ['nullable', 'string', 'max:255'],
+            'tag_number' => ['required', 'string', 'max:255'],
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'item_category_id' => ['required', 'exists:item_categories,id'],
             'item_status_id' => ['required', 'exists:item_statuses,id'],
-            'price' => ['nullable', 'numeric'],
+            'price' => ['required', 'numeric'],
             'currency_id' => ['nullable', 'exists:currencies,id'],
             'depreciation_rate' => ['nullable', 'numeric'],
             'purchase_date' => ['nullable', 'date'],
@@ -207,7 +207,7 @@ class ItemController extends Controller
 
         return Inertia::render('Items/Edit', [
             'item' => $item->load(['category', 'status', 'currency', 'project']),
-            'categories' => ItemCategory::orderBy('name')->get(),
+            'categories' => ItemCategory::where('is_active', true)->orderBy('name')->get(),
             'statuses' => ItemStatus::orderBy('name')->get(),
             'currencies' => Currency::orderBy('code')->get(),
             'projects' => $projectOptions,
@@ -246,7 +246,14 @@ class ItemController extends Controller
             'image' => ['nullable', 'image', 'max:2048'],
         ]);
 
-        // Handle multiple images - merge with existing images
+        // Handle multiple images - use images_to_keep if provided, otherwise keep all existing
+        $imagesToKeep = $request->input('images_to_keep', []);
+        if (!is_array($imagesToKeep)) {
+            $imagesToKeep = [];
+        }
+        
+        $allImages = $imagesToKeep; // Start with images to keep
+        
         if ($request->hasFile('images')) {
             $imagePaths = [];
             foreach ($request->file('images') as $image) {
@@ -254,14 +261,8 @@ class ItemController extends Controller
                 $imagePaths[] = '/storage/'.$path;
             }
             
-            // Get existing images and merge with new ones
-            $existingImages = $item->images ?? [];
-            if (!is_array($existingImages)) {
-                $existingImages = [];
-            }
-            
-            // Merge existing images with new ones (limit to max 4 total)
-            $allImages = array_merge($existingImages, $imagePaths);
+            // Merge kept images with new ones (limit to max 4 total)
+            $allImages = array_merge($allImages, $imagePaths);
             $allImages = array_slice($allImages, 0, 4); // Limit to 4 images
             
             // Store all images in images array
@@ -275,21 +276,21 @@ class ItemController extends Controller
             $path = $request->file('image')->store('items', 'public');
             $newImagePath = '/storage/'.$path;
             
-            // Get existing images and add new one
-            $existingImages = $item->images ?? [];
-            if (!is_array($existingImages)) {
-                $existingImages = [];
-            }
-            
-            // Add new image to existing ones (limit to max 4 total)
-            $allImages = array_merge($existingImages, [$newImagePath]);
+            // Merge kept images with new one (limit to max 4 total)
+            $allImages = array_merge($allImages, [$newImagePath]);
             $allImages = array_slice($allImages, 0, 4); // Limit to 4 images
             
             $validated['image_path'] = $allImages[0];
             $validated['images'] = $allImages;
+        } else {
+            // No new images, but update with kept images
+            $validated['images'] = $allImages;
+            if (!empty($allImages)) {
+                $validated['image_path'] = $allImages[0];
+            } else {
+                $validated['image_path'] = null;
+            }
         }
-        // If no new images uploaded, preserve existing images
-        // Don't include images in validated if not updating, so existing ones are preserved
 
         if (! $user->isSuperAdmin() && isset($validated['project_id'])) {
             $allowedProjectIds = $user->projects()->pluck('projects.id');

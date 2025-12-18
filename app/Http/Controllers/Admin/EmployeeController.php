@@ -43,12 +43,20 @@ class EmployeeController extends Controller
             'locations' => (clone $employeesQuery)->distinct('location')->count('location'),
         ];
 
+        // Get all available items (not already assigned to any employee)
+        $assignedItemIds = ItemEmployeeAssignment::pluck('item_id')->toArray();
+        $availableItems = Item::whereNotIn('id', $assignedItemIds)
+            ->with('category', 'status')
+            ->orderBy('name')
+            ->get(['id', 'tag_number', 'name', 'item_category_id', 'item_status_id']);
+
         return Inertia::render('Employees/Index', [
             'employees' => $employees,
             'stats' => $stats,
             'filters' => [
                 'search' => $search,
             ],
+            'availableItems' => $availableItems,
         ]);
     }
 
@@ -65,8 +73,8 @@ class EmployeeController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'location' => ['nullable', 'string', 'max:255'],
             'position' => ['nullable', 'string', 'max:255'],
-            'email' => ['nullable', 'email', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255'],
+            'phone' => ['required', 'string', 'max:255'],
             'address' => ['nullable', 'string'],
             'image' => ['nullable', 'image', 'max:2048'],
         ]);

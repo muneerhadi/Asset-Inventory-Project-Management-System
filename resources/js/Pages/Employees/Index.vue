@@ -7,12 +7,42 @@ const props = defineProps({
     employees: Object,
     stats: Object,
     filters: Object,
+    availableItems: Array,
 });
 
 const search = ref(props.filters?.search ?? '');
+const selectedEmployeeId = ref(null);
+const selectedItemId = ref(null);
+const showAssignModal = ref(false);
 
 const submitSearch = () => {
     router.get(route('employees.index'), { search: search.value }, { preserveState: true, replace: true });
+};
+
+const openAssignModal = (employeeId) => {
+    selectedEmployeeId.value = employeeId;
+    selectedItemId.value = null;
+    showAssignModal.value = true;
+};
+
+const closeAssignModal = () => {
+    showAssignModal.value = false;
+    selectedEmployeeId.value = null;
+    selectedItemId.value = null;
+};
+
+const assignItem = () => {
+    if (!selectedEmployeeId.value || !selectedItemId.value) return;
+    router.post(
+        route('employees.assign-item', selectedEmployeeId.value),
+        { item_id: selectedItemId.value },
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                closeAssignModal();
+            },
+        },
+    );
 };
 </script>
 
@@ -96,6 +126,14 @@ const submitSearch = () => {
                                                 <i class="fa-solid fa-eye text-xs"></i>
                                                 <span>View</span>
                                             </Link>
+                                            <button
+                                                type="button"
+                                                @click="openAssignModal(employee.id)"
+                                                class="inline-flex items-center gap-1 rounded-md bg-emerald-100 px-2 py-1 text-xs font-medium text-emerald-700 transition hover:bg-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:hover:bg-emerald-900/60"
+                                            >
+                                                <i class="fa-solid fa-link text-xs"></i>
+                                                <span>Assign Item</span>
+                                            </button>
                                             <Link
                                                 :href="route('employees.edit', employee.id)"
                                                 class="inline-flex items-center gap-1 rounded-md bg-slate-200 px-2 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
@@ -145,6 +183,57 @@ const submitSearch = () => {
                             <i class="fa-solid fa-chevron-right"></i>
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assign Item Modal -->
+        <div v-if="showAssignModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 dark:bg-black/70">
+            <div class="w-full max-w-md space-y-4 rounded-xl bg-white shadow-xl dark:bg-slate-900">
+                <div class="border-b border-slate-200 bg-gradient-to-r from-sky-50 to-blue-50 px-6 py-4 dark:border-slate-700 dark:from-slate-800 dark:to-slate-900">
+                    <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-50">
+                        <i class="fa-solid fa-box mr-2 text-sky-600 dark:text-sky-400"></i>
+                        Assign Item to Employee
+                    </h3>
+                </div>
+                <div class="space-y-4 px-6 py-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-900 dark:text-slate-50 mb-2">
+                            Select Item *
+                        </label>
+                        <select
+                            v-model="selectedItemId"
+                            class="relative w-full appearance-none rounded-lg border-2 border-slate-300 bg-white py-2.5 pl-3 pr-10 text-sm font-medium text-slate-900 shadow-sm transition-all duration-200 focus:border-sky-500 focus:outline-none focus:ring-4 focus:ring-sky-500/20 dark:border-slate-500 dark:bg-slate-800 dark:text-slate-50 dark:focus:border-sky-400"
+                        >
+                            <option :value="null" class="text-slate-500 dark:bg-slate-800 dark:text-slate-400">Select item...</option>
+                            <option v-for="item in availableItems" :key="item.id" :value="String(item.id)" class="text-slate-900 dark:bg-slate-800 dark:text-slate-50">
+                                {{ item.tag_number || item.id }} - {{ item.name }} ({{ item.category?.name || 'No category' }})
+                            </option>
+                        </select>
+                        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                            <i class="fa-solid fa-info-circle mr-1"></i>
+                            One item can only be assigned to one employee at a time.
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-end gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-700 dark:bg-slate-800/50">
+                    <button
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+                        @click="closeAssignModal"
+                    >
+                        <i class="fa-solid fa-xmark"></i>
+                        Cancel
+                    </button>
+                    <button
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-sky-600 to-blue-600 px-6 py-2.5 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-sky-700 dark:to-blue-800 disabled:opacity-50"
+                        @click="assignItem"
+                        :disabled="!selectedItemId"
+                    >
+                        <i class="fa-solid fa-check"></i>
+                        Assign
+                    </button>
                 </div>
             </div>
         </div>

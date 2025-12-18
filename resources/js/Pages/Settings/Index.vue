@@ -14,15 +14,21 @@ const props = defineProps({
 const categoryForm = useForm({
     name: '',
     description: '',
+    is_active: true,
 });
+
+const toggleCategory = (category) => {
+    router.put(route('settings.categories.toggle', category.id), {
+        is_active: !category.is_active,
+    }, {
+        preserveState: true,
+        preserveScroll: true,
+    });
+};
 
 const statusForm = useForm({
     name: '',
-    slug: '',
     description: '',
-    is_default: false,
-    is_available: false,
-    is_damaged: false,
 });
 
 const currencyForm = useForm({
@@ -117,14 +123,14 @@ const toggleEditingProject = (projectId) => {
                 <div class="grid gap-6 lg:grid-cols-3">
                     <!-- Categories -->
                     <section class="rounded-xl border border-blue-200/60 bg-gradient-to-br from-blue-50/80 via-white to-sky-50/80 p-5 shadow-md lg:col-span-1 dark:border-blue-900/40 dark:bg-gradient-to-br dark:from-blue-950/40 dark:via-slate-900 dark:to-sky-950/30">
-                        <h3 class="text-sm font-semibold text-gray-900">Item Categories</h3>
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-slate-50">Item Categories</h3>
                         <form class="mt-3 space-y-2" @submit.prevent="submitCategory">
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 dark:text-slate-300">Name</label>
                                 <input
                                     v-model="categoryForm.name"
                                     type="text"
-                                    class="mt-1 block w-full rounded-md border-gray-300 bg-white text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-slate-100 dark:text-black"
+                                    class="mt-1 block w-full rounded-md border-gray-300 bg-white text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50 dark:focus:border-indigo-400"
                                     required
                                 />
                             </div>
@@ -133,7 +139,7 @@ const toggleEditingProject = (projectId) => {
                                 <textarea
                                     v-model="categoryForm.description"
                                     rows="2"
-                                    class="mt-1 block w-full rounded-md border-gray-300 bg-white text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-slate-100 dark:text-black"
+                                    class="mt-1 block w-full rounded-md border-gray-300 bg-white text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50 dark:focus:border-indigo-400"
                                 />
                             </div>
                             <div class="pt-2 flex justify-end">
@@ -152,9 +158,16 @@ const toggleEditingProject = (projectId) => {
                             <li
                                 v-for="cat in categories"
                                 :key="cat.id"
-                                class="py-1.5"
+                                class="py-1.5 flex items-center justify-between"
                             >
-                                <span>{{ cat.name }}</span>
+                                <span :class="{'opacity-50 line-through': !cat.is_active}">{{ cat.name }}</span>
+                                <button
+                                    v-if="cat.is_active !== undefined"
+                                    @click="toggleCategory(cat)"
+                                    class="text-xs px-2 py-1 rounded bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-200"
+                                >
+                                    {{ cat.is_active ? 'Disable' : 'Enable' }}
+                                </button>
                             </li>
                             <li v-if="!categories.length" class="py-2 text-xs text-gray-500 dark:text-slate-400">
                                 No categories yet.
@@ -176,35 +189,12 @@ const toggleEditingProject = (projectId) => {
                                 />
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-700">Slug</label>
-                                <input
-                                    v-model="statusForm.slug"
-                                    type="text"
-                                    class="mt-1 block w-full rounded-md border-gray-300 bg-white text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-slate-100 dark:text-black"
-                                    required
-                                />
-                            </div>
-                            <div>
                                 <label class="block text-xs font-medium text-gray-700 dark:text-slate-300">Description</label>
                                 <textarea
                                     v-model="statusForm.description"
                                     rows="2"
-                                    class="mt-1 block w-full rounded-md border-gray-300 bg-white text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-slate-100 dark:text-black"
+                                    class="mt-1 block w-full rounded-md border-gray-300 bg-white text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50 dark:focus:border-indigo-400"
                                 />
-                            </div>
-                            <div class="flex flex-wrap gap-3 text-xs text-gray-700 dark:text-slate-300">
-                                <label class="inline-flex items-center gap-1">
-                                    <input v-model="statusForm.is_default" type="checkbox" class="rounded border-gray-300 text-indigo-600" />
-                                    Default
-                                </label>
-                                <label class="inline-flex items-center gap-1">
-                                    <input v-model="statusForm.is_available" type="checkbox" class="rounded border-gray-300 text-indigo-600" />
-                                    Available
-                                </label>
-                                <label class="inline-flex items-center gap-1">
-                                    <input v-model="statusForm.is_damaged" type="checkbox" class="rounded border-gray-300 text-indigo-600" />
-                                    Damaged
-                                </label>
                             </div>
                             <div class="pt-2 flex justify-end">
                                 <button
@@ -224,10 +214,7 @@ const toggleEditingProject = (projectId) => {
                                 :key="st.id"
                                 class="py-1.5"
                             >
-                                <div>
-                                    <p class="font-medium dark:text-slate-50">{{ st.name }}</p>
-                                    <p class="text-xs text-gray-500 dark:text-slate-400">{{ st.slug }}</p>
-                                </div>
+                                <p class="font-medium dark:text-slate-50">{{ st.name }}</p>
                             </li>
                             <li v-if="!statuses.length" class="py-2 text-xs text-gray-500 dark:text-slate-400">
                                 No statuses yet.
