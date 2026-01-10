@@ -73,6 +73,11 @@ class ProjectController extends Controller
             'logo' => ['nullable', 'image', 'max:2048'],
         ]);
 
+        // Auto-generate code if not provided
+        if (empty($validated['code'])) {
+            $validated['code'] = 'PROJ-' . strtoupper(substr(uniqid(), -6));
+        }
+
         if ($request->hasFile('logo')) {
             $path = $request->file('logo')->store('projects', 'public');
             $validated['logo_path'] = '/storage/'.$path;

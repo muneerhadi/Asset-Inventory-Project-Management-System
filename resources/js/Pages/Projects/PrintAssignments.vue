@@ -40,7 +40,7 @@ const printPage = () => {
                         Item-Employee Assignments
                     </h2>
                     <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                        {{ project.code }} · {{ project.name }}
+                        <span class="hidden">{{ project.code }}</span> · {{ project.name }}
                     </p>
                 </div>
                 <div class="flex gap-2 print:hidden">
@@ -70,7 +70,7 @@ const printPage = () => {
                     <!-- Header / Summary -->
                     <div class="mb-8 text-center border-b-2 border-slate-300 pb-6 bg-white/80 rounded-xl shadow-sm">
                         <h1 class="text-3xl font-bold text-slate-900 mb-2">Item-Employee Assignments Report</h1>
-                        <p class="text-sm text-slate-600 mb-1">{{ project.name }} ({{ project.code }})</p>
+                        <p class="text-sm text-slate-600 mb-1">{{ project.name }} (<span class="hidden">{{ project.code }}</span>)</p>
                         <p class="text-xs text-slate-500">Generated on {{ new Date().toLocaleDateString() }} at {{ new Date().toLocaleTimeString() }}</p>
                     </div>
 
@@ -155,7 +155,7 @@ const printPage = () => {
                             Item-Employee Assignments Report
                         </p>
                         <p class="mt-1 text-xs text-slate-700">
-                            {{ project.name }} ({{ project.code }})
+                            {{ project.name }} (<span class="hidden">{{ project.code }}</span>)
                         </p>
 
                         <!-- Time -->

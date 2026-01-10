@@ -45,7 +45,7 @@ const printPage = () => {
                         Project Inventory
                     </h2>
                     <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                        {{ project.code }} · {{ project.name }}
+                        <span class="hidden">{{ project.code }}</span> · {{ project.name }}
                     </p>
                 </div>
                 <div class="flex gap-2 print:hidden">

@@ -67,7 +67,7 @@ const importItems = () => {
                             {{ project.name }}
                         </h2>
                         <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                            {{ project.code }}
+                            Project Details
                         </p>
                     </div>
                     <div class="flex flex-wrap gap-2">
@@ -133,13 +133,13 @@ const importItems = () => {
                                 Project Overview
                             </h3>
                             <dl class="mt-4 grid grid-cols-1 gap-x-4 gap-y-4 text-sm md:grid-cols-2">
-                                <div>
+                                <div class="md:col-span-2">
                                     <dt class="text-xs font-medium uppercase tracking-wide text-slate-600 dark:text-slate-400">Name</dt>
                                     <dd class="mt-2 font-semibold text-slate-900 dark:text-slate-50">{{ project.name }}</dd>
                                 </div>
-                                <div>
+                                <div class="hidden md:col-span-2">
                                     <dt class="text-xs font-medium uppercase tracking-wide text-slate-600 dark:text-slate-400">Code</dt>
-                                    <dd class="mt-2 font-medium text-slate-900 dark:text-slate-50">{{ project.code }}</dd>
+                                    <dd class="mt-2 font-semibold text-slate-900 dark:text-slate-50">{{ project.code }}</dd>
                                 </div>
                                 <div>
                                     <dt class="text-xs font-medium uppercase tracking-wide text-slate-600 dark:text-slate-400">Start Date</dt>
