@@ -113,15 +113,6 @@ class EmployeeController extends Controller
 
     public function show(Request $request, Employee $employee): Response
     {
-        $user = $request->user();
-
-        if (! $user->isSuperAdmin()) {
-            $projectIds = $user->projects()->pluck('projects.id');
-            if (! $employee->projects()->whereIn('projects.id', $projectIds)->exists()) {
-                abort(403);
-            }
-        }
-
         $employee->load(['projects', 'itemEmployeeAssignments.item.category', 'itemEmployeeAssignments.item.status']);
         
         // Get all available items (not already assigned to any employee)
@@ -143,15 +134,6 @@ class EmployeeController extends Controller
 
     public function edit(Request $request, Employee $employee): Response
     {
-        $user = $request->user();
-
-        if (! $user->isSuperAdmin()) {
-            $projectIds = $user->projects()->pluck('projects.id');
-            if (! $employee->projects()->whereIn('projects.id', $projectIds)->exists()) {
-                abort(403);
-            }
-        }
-
         return Inertia::render('Employees/Edit', [
             'employee' => $employee,
         ]);
@@ -161,19 +143,12 @@ class EmployeeController extends Controller
     {
         $user = $request->user();
 
-        if (! $user->isSuperAdmin()) {
-            $projectIds = $user->projects()->pluck('projects.id');
-            if (! $employee->projects()->whereIn('projects.id', $projectIds)->exists()) {
-                abort(403);
-            }
-        }
-
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'location' => ['nullable', 'string', 'max:255'],
             'position' => ['nullable', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
-'phone' => ['nullable', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string'],
             'image' => ['nullable', 'image', 'max:2048'],
         ]);
@@ -223,13 +198,6 @@ class EmployeeController extends Controller
     {
         $user = $request->user();
 
-        if (! $user->isSuperAdmin()) {
-            $projectIds = $user->projects()->pluck('projects.id');
-            if (! $employee->projects()->whereIn('projects.id', $projectIds)->exists()) {
-                abort(403);
-            }
-        }
-
         $validated = $request->validate([
             'item_ids' => ['required', 'array', 'min:1'],
             'item_ids.*' => ['exists:items,id'],
@@ -278,13 +246,6 @@ class EmployeeController extends Controller
     public function unassignItem(Request $request, Employee $employee, ItemEmployeeAssignment $assignment): RedirectResponse
     {
         $user = $request->user();
-
-        if (! $user->isSuperAdmin()) {
-            $projectIds = $user->projects()->pluck('projects.id');
-            if (! $employee->projects()->whereIn('projects.id', $projectIds)->exists()) {
-                abort(403);
-            }
-        }
 
         // Verify the assignment belongs to this employee
         if ($assignment->employee_id !== $employee->id) {

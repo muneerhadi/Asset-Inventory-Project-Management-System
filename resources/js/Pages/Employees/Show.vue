@@ -65,6 +65,7 @@ const unassignItem = (assignmentId) => {
                         Edit
                     </Link>
                     <button
+                        v-if="$page.props.auth.user.role === 'super_admin'"
                         type="button"
                         @click="deleteEmployee"
                         class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-rose-600 to-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-rose-700 dark:to-red-800"
