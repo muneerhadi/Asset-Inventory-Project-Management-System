@@ -131,7 +131,7 @@ class DatabaseSeeder extends Seeder
         Item::updateOrCreate(
             ['item_code' => 'ITM-001'],
             [
-                'tag_number' => 'TAG-001',
+                'tag_number' => 'UA-AFV-IT-KBL-QLB-01',
                 'name' => 'Dell Laptop',
                 'description' => '15" laptop for project team',
                 'item_category_id' => $laptopCategory->id,
@@ -152,7 +152,7 @@ class DatabaseSeeder extends Seeder
         Item::updateOrCreate(
             ['item_code' => 'ITM-002'],
             [
-                'tag_number' => 'TAG-002',
+                'tag_number' => 'UA-AFV-IT-KBL-QLB-02',
                 'name' => 'Office Chair',
                 'description' => 'Ergonomic chair',
                 'item_category_id' => $furnitureCategory->id,

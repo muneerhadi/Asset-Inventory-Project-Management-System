@@ -232,45 +232,48 @@ class EmployeeController extends Controller
         }
 
         $validated = $request->validate([
-            'item_id' => ['required', 'exists:items,id'],
+            'item_ids' => ['required', 'array', 'min:1'],
+            'item_ids.*' => ['exists:items,id'],
         ]);
 
-        $item = Item::findOrFail($validated['item_id']);
+        $assignedCount = 0;
+        $alreadyAssigned = [];
+        
+        foreach ($validated['item_ids'] as $itemId) {
+            $item = Item::findOrFail($itemId);
 
-        // Check if item is already assigned to another employee
-        $existingAssignment = ItemEmployeeAssignment::where('item_id', $item->id)
-            ->where('employee_id', '!=', $employee->id)
-            ->first();
+            // Check if item is already assigned to any employee
+            $existingAssignment = ItemEmployeeAssignment::where('item_id', $item->id)->first();
 
-        if ($existingAssignment) {
-            return redirect()->back()->with('error', 'This item is already assigned to another employee.');
+            if ($existingAssignment) {
+                $alreadyAssigned[] = $item->tag_number ?? $item->name;
+                continue;
+            }
+
+            // Create assignment
+            ItemEmployeeAssignment::create([
+                'item_id' => $item->id,
+                'employee_id' => $employee->id,
+                'project_id' => null,
+            ]);
+            
+            $assignedCount++;
         }
-
-        // Check if already assigned to this employee
-        $existing = ItemEmployeeAssignment::where('item_id', $item->id)
-            ->where('employee_id', $employee->id)
-            ->first();
-
-        if ($existing) {
-            return redirect()->back()->with('error', 'This item is already assigned to this employee.');
-        }
-
-        // Create assignment without project_id (not tied to a project)
-        $assignment = new ItemEmployeeAssignment();
-        $assignment->item_id = $item->id;
-        $assignment->employee_id = $employee->id;
-        $assignment->project_id = null; // Not tied to a project
-        $assignment->save();
 
         Activity::create([
             'user_id' => $user->id,
-            'action' => 'item_assigned_to_employee',
-            'description' => 'Item '.$item->tag_number.' assigned to employee '.$employee->name,
+            'action' => 'items_assigned_to_employee',
+            'description' => $assignedCount.' items assigned to employee '.$employee->name,
             'subject_type' => Employee::class,
             'subject_id' => $employee->id,
         ]);
 
-        return redirect()->back()->with('success', 'Item assigned to employee successfully.');
+        $message = $assignedCount.' items assigned successfully.';
+        if (!empty($alreadyAssigned)) {
+            $message .= ' Some items were already assigned: '.implode(', ', $alreadyAssigned);
+        }
+
+        return redirect()->back()->with('success', $message);
     }
 
     public function unassignItem(Request $request, Employee $employee, ItemEmployeeAssignment $assignment): RedirectResponse

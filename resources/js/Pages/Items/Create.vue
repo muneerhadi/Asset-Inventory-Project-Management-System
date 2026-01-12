@@ -8,6 +8,7 @@ const props = defineProps({
     statuses: Array,
     currencies: Array,
     projects: Array,
+    nextSequentialNumber: Number,
 });
 
 const defaultCategoryId = props.categories[0]?.id ?? null;
@@ -124,14 +125,21 @@ const submit = () => {
                                     <label class="block text-xs font-medium uppercase tracking-wide text-slate-600 dark:text-slate-400">
                                         Tag number <span class="text-rose-500">*</span>
                                     </label>
+                                    <div class="mt-1 mb-2 text-xs text-blue-600 dark:text-blue-400">
+                                        Next available number: {{ nextSequentialNumber.toString().padStart(2, '0') }}
+                                    </div>
                                     <input
                                         v-model="form.tag_number"
                                         type="text"
+                                        placeholder="e.g., UA-AFV-IT-KBL-QLB-34"
                                         class="mt-2 block w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder-slate-500 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-50 dark:placeholder-slate-400 dark:focus:border-sky-400"
                                         required
                                     />
                                     <p v-if="form.errors.tag_number" class="mt-1 text-xs text-rose-600 dark:text-rose-400">
                                         {{ form.errors.tag_number }}
+                                    </p>
+                                    <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                        Tag number must end with a unique number (e.g., 34)
                                     </p>
                                 </div>
                                 <div>

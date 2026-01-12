@@ -64,4 +64,46 @@ class Item extends Model
     {
         return $this->hasMany(ItemEmployeeAssignment::class);
     }
+
+    /**
+     * Extract sequential number from tag number
+     */
+    public static function extractSequentialNumber($tagNumber)
+    {
+        if (preg_match('/(\d+)$/', $tagNumber, $matches)) {
+            return (int) $matches[1];
+        }
+        return null;
+    }
+
+    /**
+     * Get next available sequential number
+     */
+    public static function getNextSequentialNumber()
+    {
+        $maxNumber = self::query()
+            ->get()
+            ->map(fn($item) => self::extractSequentialNumber($item->tag_number))
+            ->filter()
+            ->max();
+        
+        return $maxNumber ? $maxNumber + 1 : 1;
+    }
+
+    /**
+     * Get recent items sorted by sequential number
+     */
+    public static function getRecentItemsBySequence($limit = 3)
+    {
+        return self::with(['category', 'status', 'project'])
+            ->get()
+            ->map(function ($item) {
+                $item->sequential_number = self::extractSequentialNumber($item->tag_number);
+                return $item;
+            })
+            ->filter(fn($item) => $item->sequential_number !== null)
+            ->sortByDesc('sequential_number')
+            ->take($limit)
+            ->values();
+    }
 }

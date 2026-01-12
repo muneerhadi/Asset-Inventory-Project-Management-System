@@ -67,7 +67,24 @@ class DashboardController extends Controller
                 ->get();
 
             $recentEmployees = $employeesQuery->latest()->take(3)->get();
-            $recentItems = $itemsQuery->latest()->take(3)->get();
+            
+            // Get recent items by sequential number instead of creation date
+            if ($user->isSuperAdmin()) {
+                $recentItems = Item::getRecentItemsBySequence(3);
+            } else {
+                $projectIds = $user->projects()->pluck('projects.id');
+                $recentItems = Item::with(['category', 'status', 'project'])
+                    ->whereIn('project_id', $projectIds)
+                    ->get()
+                    ->map(function ($item) {
+                        $item->sequential_number = Item::extractSequentialNumber($item->tag_number);
+                        return $item;
+                    })
+                    ->filter(fn($item) => $item->sequential_number !== null)
+                    ->sortByDesc('sequential_number')
+                    ->take(3)
+                    ->values();
+            }
 
             return Inertia::render('Dashboard', [
                 'welcomeMessage' => 'Welcome, '.$user->name,

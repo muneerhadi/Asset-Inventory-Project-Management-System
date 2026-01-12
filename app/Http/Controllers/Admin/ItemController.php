@@ -9,6 +9,7 @@ use App\Models\Item;
 use App\Models\ItemCategory;
 use App\Models\ItemStatus;
 use App\Models\Project;
+use App\Rules\UniqueTagSequentialNumber;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -89,6 +90,7 @@ class ItemController extends Controller
             'statuses' => ItemStatus::orderBy('name')->get(),
             'currencies' => Currency::orderBy('code')->get(),
             'projects' => $projectOptions,
+            'nextSequentialNumber' => Item::getNextSequentialNumber(),
         ]);
     }
 
@@ -97,7 +99,7 @@ class ItemController extends Controller
         $user = $request->user();
 
         $validated = $request->validate([
-            'tag_number' => ['required', 'string', 'max:255'],
+            'tag_number' => ['required', 'string', 'max:255', new UniqueTagSequentialNumber()],
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'item_category_id' => ['required', 'exists:item_categories,id'],
@@ -226,7 +228,7 @@ class ItemController extends Controller
         }
 
         $validated = $request->validate([
-            'tag_number' => ['nullable', 'string', 'max:255'],
+            'tag_number' => ['nullable', 'string', 'max:255', new UniqueTagSequentialNumber($item->id)],
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'item_category_id' => ['required', 'exists:item_categories,id'],
