@@ -56,14 +56,16 @@ const toggleTheme = () => {
             <!-- Sidebar navigation (left) -->
             <aside
                 :class="[
-                    'hidden md:flex md:flex-col w-64 px-4 py-4 bg-gradient-to-b from-sky-900 via-slate-900 to-slate-950 text-slate-100 shadow-xl transform transition duration-300 ease-out print:hidden',
+                    'hidden md:flex md:flex-col w-64 px-4 py-4 bg-gradient-to-b from-sky-900 via-slate-900 to-slate-950 text-slate-100 shadow-xl transform transition duration-300 ease-out print:hidden sticky top-0 h-screen',
                     sidebarVisible ? 'translate-x-0 opacity-100' : '-translate-x-4 opacity-0',
                 ]"
             >
-                <div class="flex h-14 items-center gap-2">
-                    <Link :href="route('dashboard')" class="flex items-center gap-3">
-                        <ApplicationLogo class="h-9 w-auto fill-current text-slate-50" />
-                        <span class="text-sm font-semibold tracking-wide text-slate-50">
+                <div class="flex h-20 items-center justify-center gap-2 mb-6 pt-4">
+                    <Link :href="route('dashboard')" class="flex flex-col items-center gap-3">
+                        <div class="h-20 w-20">
+                            <img src="/storage/logo/union-aid-logo.png" alt="Union Aid Logo" class="h-full w-full object-contain">
+                        </div>
+                        <span class="text-lg font-bold tracking-wide text-slate-50">
                             UNION AID
                         </span>
                     </Link>
@@ -113,7 +115,7 @@ const toggleTheme = () => {
             <div class="flex min-h-screen flex-1 flex-col bg-gradient-to-b from-transparent via-blue-50/30 to-indigo-50/20 dark:from-transparent dark:via-slate-900/20 dark:to-slate-900/10">
                 <!-- Mobile top bar with menu -->
                 <header
-                    class="flex h-14 items-center justify-between border-b border-slate-200/70 bg-white/80 px-4 shadow-sm backdrop-blur dark:border-slate-800/70 dark:bg-slate-900/80 md:px-6 print:hidden"
+                    class="sticky top-0 z-50 flex h-14 items-center justify-between border-b border-slate-200/70 bg-white/80 px-4 shadow-sm backdrop-blur dark:border-slate-800/70 dark:bg-slate-900/80 md:px-6 print:hidden"
                 >
                     <div class="flex items-center gap-2 md:hidden">
                         <button
@@ -263,7 +265,7 @@ const toggleTheme = () => {
                 <!-- Mobile navigation drawer -->
                 <div
                     v-if="showingNavigationDropdown"
-                    class="border-b border-slate-200 bg-white/95 px-4 py-3 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900/95 md:hidden"
+                    class="sticky top-14 z-40 border-b border-slate-200 bg-white/95 px-4 py-3 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900/95 md:hidden"
                 >
                     <div class="space-y-1">
                         <ResponsiveNavLink

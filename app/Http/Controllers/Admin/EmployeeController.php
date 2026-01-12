@@ -200,11 +200,9 @@ class EmployeeController extends Controller
     {
         $user = $request->user();
 
+        // Only super admins can delete employees
         if (! $user->isSuperAdmin()) {
-            $projectIds = $user->projects()->pluck('projects.id');
-            if (! $employee->projects()->whereIn('projects.id', $projectIds)->exists()) {
-                abort(403);
-            }
+            abort(403, 'Only super administrators can delete employees.');
         }
 
         $code = $employee->employee_code;

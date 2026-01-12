@@ -14,6 +14,7 @@ const props = defineProps({
 const localFilters = ref({
     project_id: props.filters.project_id ?? null,
     status_id: props.filters.status_id ?? null,
+    assignment_status: props.filters.assignment_status ?? null,
     from: props.filters.from ?? null,
     to: props.filters.to ?? null,
     price_min: props.filters.price_min ?? null,
@@ -32,6 +33,7 @@ const clearFilters = () => {
     localFilters.value = {
         project_id: null,
         status_id: null,
+        assignment_status: null,
         from: null,
         to: null,
         price_min: null,
@@ -50,6 +52,7 @@ watch(
         localFilters.value = {
             project_id: newFilters.project_id ?? null,
             status_id: newFilters.status_id ?? null,
+            assignment_status: newFilters.assignment_status ?? null,
             from: newFilters.from ?? null,
             to: newFilters.to ?? null,
             price_min: newFilters.price_min ?? null,
@@ -106,7 +109,7 @@ watch(
                             Filter Criteria
                         </h3>
                         <form
-                            class="grid gap-4 md:grid-cols-4"
+                            class="grid gap-4 md:grid-cols-3 lg:grid-cols-4"
                             @submit.prevent="applyFilters"
                         >
                             <div class="flex flex-col">
@@ -135,10 +138,25 @@ watch(
                                     Status
                                 </label>
                                 <select
-                                    v-model="localFilters.status_id"
+                                    v-model="localFilters.assignment_status"
                                     class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50"
                                 >
                                     <option :value="null">All statuses</option>
+                                    <option value="In Stock">In Stock</option>
+                                    <option value="In Use">In Use</option>
+                                </select>
+                            </div>
+
+                            <div class="flex flex-col">
+                                <label class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    <i class="fa-solid fa-info-circle mr-1 text-slate-600 dark:text-slate-400"></i>
+                                    Situation
+                                </label>
+                                <select
+                                    v-model="localFilters.status_id"
+                                    class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50"
+                                >
+                                    <option :value="null">All situations</option>
                                     <option
                                         v-for="status in statuses"
                                         :key="status.id"
@@ -243,6 +261,10 @@ watch(
                                             Status
                                         </th>
                                         <th class="px-6 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">
+                                            <i class="fa-solid fa-info-circle mr-2 text-slate-600 dark:text-slate-400"></i>
+                                            Situation
+                                        </th>
+                                        <th class="px-6 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">
                                             <i class="fa-solid fa-calendar mr-2 text-slate-600 dark:text-slate-400"></i>
                                             Purchase Date
                                         </th>
@@ -268,13 +290,23 @@ watch(
                                         ]"
                                     >
                                         <td class="px-6 py-4 text-slate-600 dark:text-slate-400">
-                                            {{ item.project?.code || '-' }}
+                                            {{ item.project?.name || '-' }}
                                         </td>
                                         <td class="px-6 py-4 text-slate-700 dark:text-slate-300">
                                             {{ item.name }}
                                         </td>
                                         <td class="px-6 py-4">
-                                            <span v-if="item.status?.name" class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-900 dark:bg-blue-900 dark:text-blue-100">
+                                            <span :class="[
+                                                'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                                                item.assignment_status === 'In Use' 
+                                                    ? 'bg-orange-100 text-orange-900 dark:bg-orange-900 dark:text-orange-100'
+                                                    : 'bg-green-100 text-green-900 dark:bg-green-900 dark:text-green-100'
+                                            ]">
+                                                {{ item.assignment_status }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <span v-if="item.status?.name" class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-900 dark:bg-green-900 dark:text-green-100">
                                                 {{ item.status.name }}
                                             </span>
                                             <span v-else class="text-slate-500 dark:text-slate-400">-</span>
@@ -291,7 +323,7 @@ watch(
                                     </tr>
                                     <tr v-if="!items.length">
                                         <td
-                                            colspan="7"
+                                            colspan="8"
                                             class="px-6 py-8 text-center text-slate-500 dark:text-slate-400"
                                         >
                                             <i class="fa-solid fa-inbox text-4xl mb-2 block opacity-50"></i>
@@ -330,6 +362,7 @@ watch(
                                     <th class="border border-slate-900 px-3 py-2 text-left font-bold">Code</th>
                                     <th class="border border-slate-900 px-3 py-2 text-left font-bold">Name</th>
                                     <th class="border border-slate-900 px-3 py-2 text-left font-bold">Status</th>
+                                    <th class="border border-slate-900 px-3 py-2 text-left font-bold">Situation</th>
                                     <th class="border border-slate-900 px-3 py-2 text-left font-bold">Purchase Date</th>
                                     <th class="border border-slate-900 px-3 py-2 text-left font-bold">Location</th>
                                     <th class="border border-slate-900 px-3 py-2 text-left font-bold">Price</th>
@@ -337,8 +370,9 @@ watch(
                             </thead>
                             <tbody>
                                     <tr v-for="item in items" :key="item.id" class="border border-slate-900">
-                                    <td class="border border-slate-900 px-3 py-2 text-black">{{ item.project?.code || '-' }}</td>
+                                    <td class="border border-slate-900 px-3 py-2 text-black">{{ item.project?.name || '-' }}</td>
                                     <td class="border border-slate-900 px-3 py-2 text-black">{{ item.name }}</td>
+                                    <td class="border border-slate-900 px-3 py-2 text-black">{{ item.assignment_status }}</td>
                                     <td class="border border-slate-900 px-3 py-2 text-black">{{ item.status?.name || '-' }}</td>
                                     <td class="border border-slate-900 px-3 py-2 text-black">{{ formatDate(item.purchase_date) }}</td>
                                     <td class="border border-slate-900 px-3 py-2 text-black">
@@ -347,7 +381,7 @@ watch(
                                     <td class="border border-slate-900 px-3 py-2 text-black">{{ item.price ? parseFloat(item.price).toFixed(2) + ' ' + (item.currency?.code || '') : '-' }}</td>
                                 </tr>
                                 <tr v-if="!items.length">
-                                    <td colspan="7" class="border border-slate-900 px-3 py-4 text-center font-medium text-black">
+                                    <td colspan="8" class="border border-slate-900 px-3 py-4 text-center font-medium text-black">
                                         No items match the selected filters.
                                     </td>
                                 </tr>

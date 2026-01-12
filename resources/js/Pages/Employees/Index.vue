@@ -166,6 +166,7 @@ const cancelDelete = () => {
                                                 <span>Edit</span>
                                             </Link>
                                             <button
+                                                v-if="$page.props.auth.user.role === 'super_admin'"
                                                 type="button"
                                                 @click="deleteEmployee(employee)"
                                                 class="inline-flex items-center gap-1 rounded-md bg-rose-100 px-2 py-1 text-xs font-medium text-rose-700 transition hover:bg-rose-200 dark:bg-rose-900/40 dark:text-rose-300 dark:hover:bg-rose-900/60"
