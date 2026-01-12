@@ -188,7 +188,7 @@ const cancelDelete = () => {
                                     <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Type</th>
                                     <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Owner Name</th>
                                     <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Purchase Date</th>
-                                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Status</th>
+                                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Situation</th>
                                     <th class="px-4 py-3 text-right font-semibold text-slate-900 dark:text-slate-50">Action</th>
                                 </tr>
                             </thead>

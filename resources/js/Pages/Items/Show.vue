@@ -171,7 +171,7 @@ onUnmounted(() => {
                                     <dd class="mt-1.5 text-sm text-slate-700 dark:text-slate-300">{{ item.category?.name ?? '-' }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-xs font-medium uppercase tracking-wide text-slate-600 dark:text-slate-400">Status</dt>
+                                    <dt class="text-xs font-medium uppercase tracking-wide text-slate-600 dark:text-slate-400">Situation</dt>
                                     <dd class="mt-1.5">
                                         <span
                                             class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold"

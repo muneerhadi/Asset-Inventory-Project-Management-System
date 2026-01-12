@@ -14,7 +14,16 @@ class ReportController extends Controller
 {
     public function index(Request $request): Response
     {
-        $projects = Project::orderBy('name')->get(['id', 'code', 'name']);
+        $user = $request->user();
+        
+        $projectsQuery = Project::orderBy('name');
+        
+        if (! $user->isSuperAdmin()) {
+            $projectIds = $user->projects()->pluck('projects.id');
+            $projectsQuery->whereIn('id', $projectIds);
+        }
+        
+        $projects = $projectsQuery->get(['id', 'code', 'name']);
 
         return Inertia::render('Reports/Index', [
             'projects' => $projects,
@@ -143,10 +152,17 @@ class ReportController extends Controller
 
         $items = $itemsQuery->orderBy('purchase_date')->get();
 
+        $projectsQuery = Project::orderBy('name');
+        
+        if (! $user->isSuperAdmin()) {
+            $projectIds = $user->projects()->pluck('projects.id');
+            $projectsQuery->whereIn('id', $projectIds);
+        }
+
         return Inertia::render('Reports/Custom', [
             'items' => $items,
             'filters' => $filters,
-            'projects' => Project::orderBy('name')->get(['id', 'code', 'name']),
+            'projects' => $projectsQuery->get(['id', 'code', 'name']),
             'statuses' => ItemStatus::orderBy('name')->get(['id', 'name']),
         ]);
     }

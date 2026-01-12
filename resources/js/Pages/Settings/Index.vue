@@ -224,7 +224,7 @@ const toggleEditingProject = (projectId) => {
 
                     <!-- Statuses -->
                     <section class="rounded-xl border border-purple-200/60 bg-gradient-to-br from-purple-50/80 via-white to-pink-50/80 p-5 shadow-md lg:col-span-1 dark:border-purple-900/40 dark:bg-gradient-to-br dark:from-purple-950/40 dark:via-slate-900 dark:to-pink-950/30">
-                        <h3 class="text-sm font-semibold text-gray-900 dark:text-slate-50">Item Statuses</h3>
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-slate-50">Item Situations</h3>
                         <form class="mt-3 space-y-2" @submit.prevent="submitStatus">
                             <div>
                                 <label class="block text-xs font-medium text-gray-700 dark:text-slate-300">Name</label>
@@ -250,7 +250,7 @@ const toggleEditingProject = (projectId) => {
                                     :disabled="statusForm.processing"
                                 >
                                     <i class="fa-solid fa-plus text-[11px]"></i>
-                                    <span>Add status</span>
+                                    <span>Add situation</span>
                                 </button>
                             </div>
                         </form>
@@ -264,7 +264,7 @@ const toggleEditingProject = (projectId) => {
                                 <p class="font-medium dark:text-slate-50">{{ st.name }}</p>
                             </li>
                             <li v-if="!statuses.length" class="py-2 text-xs text-gray-500 dark:text-slate-400">
-                                No statuses yet.
+                                No situations yet.
                             </li>
                         </ul>
                     </section>
