@@ -40,11 +40,11 @@ const submit = () => {
 <template>
     <section>
         <header>
-            <h2 class="text-lg font-medium text-gray-900">
+            <h2 class="text-lg font-medium text-gray-900 dark:text-slate-50">
                 Profile Information
             </h2>
 
-            <p class="mt-1 text-sm text-gray-600">
+            <p class="mt-1 text-sm text-gray-600 dark:text-slate-400">
                 Update your account's profile information and email address.
             </p>
         </header>
@@ -85,13 +85,13 @@ const submit = () => {
             </div>
 
             <div v-if="mustVerifyEmail && user.email_verified_at === null">
-                <p class="mt-2 text-sm text-gray-800">
+                <p class="mt-2 text-sm text-gray-800 dark:text-slate-300">
                     Your email address is unverified.
                     <Link
                         :href="route('verification.send')"
                         method="post"
                         as="button"
-                        class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-slate-400 dark:hover:text-slate-200"
                     >
                         Click here to re-send the verification email.
                     </Link>
@@ -99,7 +99,7 @@ const submit = () => {
 
                 <div
                     v-show="status === 'verification-link-sent'"
-                    class="mt-2 text-sm font-medium text-green-600"
+                    class="mt-2 text-sm font-medium text-green-600 dark:text-green-400"
                 >
                     A new verification link has been sent to your email address.
                 </div>
@@ -122,14 +122,14 @@ const submit = () => {
                         </div>
                         <div
                             v-else
-                            class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-gray-200 text-xs font-medium text-gray-700"
+                            class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-gray-200 text-xs font-medium text-gray-700 dark:bg-slate-700 dark:text-slate-300"
                         >
                             {{ user.name.charAt(0) }}
                         </div>
                     </div>
 
                     <label
-                        class="cursor-pointer rounded-md border border-dashed border-gray-300 px-3 py-2 text-xs text-gray-600 hover:border-indigo-400 hover:text-indigo-600"
+                        class="cursor-pointer rounded-md border border-dashed border-gray-300 px-3 py-2 text-xs text-gray-600 hover:border-indigo-400 hover:text-indigo-600 dark:border-slate-600 dark:text-slate-400 dark:hover:border-indigo-400 dark:hover:text-indigo-400"
                     >
                         <span>Click to upload or drag & drop</span>
                         <input
@@ -155,7 +155,7 @@ const submit = () => {
                 >
                     <p
                         v-if="form.recentlySuccessful"
-                        class="text-sm text-gray-600"
+                        class="text-sm text-gray-600 dark:text-slate-400"
                     >
                         Saved.
                     </p>

@@ -73,11 +73,10 @@ defineProps({
                         </div>
 
                         <div class="mt-3 rounded-xl bg-white p-4 shadow-sm dark:bg-slate-900 dark:border dark:border-slate-700">
-                            <!-- Ensure profile form inputs use black text in dark mode -->
                             <UpdateProfileInformationForm
                                 :must-verify-email="mustVerifyEmail"
                                 :status="status"
-                                class="max-w-xl [&_input]:bg-white [&_input]:text-gray-900 [&_textarea]:bg-white [&_textarea]:text-gray-900 dark:[&_input]:bg-slate-100 dark:[&_input]:text-black dark:[&_textarea]:bg-slate-100 dark:[&_textarea]:text-black"
+                                class="max-w-xl"
                             />
                         </div>
                     </section>
@@ -101,37 +100,10 @@ defineProps({
                         </div>
 
                         <div class="mt-3 rounded-xl bg-white p-4 shadow-sm dark:bg-slate-900 dark:border dark:border-slate-700">
-                            <!-- Ensure password form inputs use black text in dark mode -->
-                            <UpdatePasswordForm
-                                class="max-w-xl [&_input]:bg-white [&_input]:text-gray-900 dark:[&_input]:bg-slate-100 dark:[&_input]:text-black"
-                            />
+                            <UpdatePasswordForm class="max-w-xl" />
                         </div>
                     </section>
                 </div>
-
-                <!-- Danger zone card (rose like distributed items metric) - Only for super admins -->
-                <section
-                    v-if="$page.props.auth.user.role === 'super_admin'"
-                    class="overflow-hidden rounded-2xl border border-rose-200/70 bg-gradient-to-br from-rose-50/90 via-white to-orange-50/80 p-5 shadow-md dark:border-rose-900/50 dark:bg-gradient-to-br dark:from-rose-950/50 dark:via-slate-950 dark:to-orange-950/50"
-                >
-                    <div class="mb-4 flex items-center gap-3">
-                        <span class="flex h-9 w-9 items-center justify-center rounded-full bg-rose-600 text-white shadow-sm dark:bg-rose-500">
-                            <i class="fa-solid fa-triangle-exclamation text-sm"></i>
-                        </span>
-                        <div>
-                            <h2 class="text-sm font-semibold text-rose-900 dark:text-rose-100">
-                                Danger zone
-                            </h2>
-                            <p class="text-xs text-rose-700/80 dark:text-rose-200/80">
-                                Deleting your account is permanent and cannot be undone.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="mt-3 rounded-xl bg-white p-4 shadow-sm dark:bg-slate-900 dark:border dark:border-rose-900/70">
-                        <DeleteUserForm class="max-w-xl" />
-                    </div>
-                </section>
             </div>
         </div>
     </AuthenticatedLayout>

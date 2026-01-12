@@ -274,7 +274,7 @@ const toggleEditingProject = (projectId) => {
                         <h3 class="text-sm font-semibold text-gray-900 dark:text-slate-50">Currencies</h3>
                         <form class="mt-3 space-y-2" @submit.prevent="submitCurrency">
                             <div>
-                                <label class="block text-xs font-medium text-gray-700">Code</label>
+                                <label class="block text-xs font-medium text-gray-700 dark:text-slate-300">Code</label>
                                 <input
                                     v-model="currencyForm.code"
                                     type="text"
@@ -292,7 +292,7 @@ const toggleEditingProject = (projectId) => {
                                 />
                             </div>
                             <div>
-                                <label class="block text-xs font-medium text-gray-700">Symbol</label>
+                                <label class="block text-xs font-medium text-gray-700 dark:text-slate-300">Symbol</label>
                                 <input
                                     v-model="currencyForm.symbol"
                                     type="text"
@@ -434,7 +434,7 @@ const toggleEditingProject = (projectId) => {
                                             </button>
                                             <button
                                                 @click="openDeleteManager(manager)"
-                                                class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 dark:bg-red-900/30 dark:text-red-300"
+                                                class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-800/40"
                                             >
                                                 Delete
                                             </button>
