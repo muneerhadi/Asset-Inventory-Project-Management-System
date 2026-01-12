@@ -47,10 +47,57 @@ const managerForm = useForm({
 
 const editingManagerProjects = ref(null);
 const editingProjects = ref([]);
+const deletingManager = ref(null);
+const deleteStep = ref(1);
+const deletePassword = ref('');
+const deletePasswordError = ref('');
 
 const openEditManagerProjects = (manager) => {
     editingManagerProjects.value = manager;
     editingProjects.value = manager.projects?.map((p) => p.id) ?? [];
+};
+
+const openDeleteManager = (manager) => {
+    deletingManager.value = manager;
+    deleteStep.value = 1;
+    deletePassword.value = '';
+    deletePasswordError.value = '';
+};
+
+const nextDeleteStep = () => {
+    if (deleteStep.value < 3) {
+        deleteStep.value++;
+    }
+};
+
+const prevDeleteStep = () => {
+    if (deleteStep.value > 1) {
+        deleteStep.value--;
+    }
+};
+
+const cancelDelete = () => {
+    deletingManager.value = null;
+    deleteStep.value = 1;
+    deletePassword.value = '';
+    deletePasswordError.value = '';
+};
+
+const confirmDelete = () => {
+    if (!deletingManager.value || !deletePassword.value) return;
+    
+    router.delete(
+        route('settings.project-managers.destroy', deletingManager.value.id),
+        {
+            data: { password: deletePassword.value },
+            onError: (errors) => {
+                deletePasswordError.value = errors.password || 'An error occurred';
+            },
+            onSuccess: () => {
+                cancelDelete();
+            },
+        }
+    );
 };
 
 const submitCategory = () => {
@@ -378,12 +425,20 @@ const toggleEditingProject = (projectId) => {
                                             <h5 class="font-medium text-gray-900 dark:text-slate-50">{{ manager.name }}</h5>
                                             <p class="text-xs text-gray-600 dark:text-slate-400">{{ manager.email }}</p>
                                         </div>
-                                        <button
-                                            @click="openEditManagerProjects(manager)"
-                                            class="text-xs px-2 py-1 bg-amber-100 text-amber-700 rounded hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-300"
-                                        >
-                                            Edit Projects
-                                        </button>
+                                        <div class="flex gap-2">
+                                            <button
+                                                @click="openEditManagerProjects(manager)"
+                                                class="text-xs px-2 py-1 bg-amber-100 text-amber-700 rounded hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-300"
+                                            >
+                                                Edit Projects
+                                            </button>
+                                            <button
+                                                @click="openDeleteManager(manager)"
+                                                class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 dark:bg-red-900/30 dark:text-red-300"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
                                     </div>
                                     <div v-if="manager.projects && manager.projects.length" class="mt-2">
                                         <p class="text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">Assigned Projects:</p>
@@ -407,6 +462,105 @@ const toggleEditingProject = (projectId) => {
                             </div>
                         </div>
                     </section>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Manager Modal -->
+        <div v-if="deletingManager" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 dark:bg-black/70">
+            <div class="w-full max-w-md space-y-4 rounded-xl bg-white shadow-xl dark:bg-slate-900">
+                <div class="border-b border-slate-200 bg-gradient-to-r from-red-50 to-rose-50 px-6 py-4 dark:border-slate-700 dark:from-slate-800 dark:to-slate-900">
+                    <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-50">
+                        <i class="fa-solid fa-triangle-exclamation mr-2 text-red-600 dark:text-red-400"></i>
+                        Delete Project Manager
+                    </h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">Step {{ deleteStep }} of 3</p>
+                </div>
+                
+                <!-- Step 1: Warning -->
+                <div v-if="deleteStep === 1" class="space-y-4 px-6 py-4">
+                    <div class="text-center">
+                        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+                            <i class="fa-solid fa-exclamation-triangle text-red-600 dark:text-red-400"></i>
+                        </div>
+                        <h4 class="mt-3 text-lg font-medium text-slate-900 dark:text-slate-50">
+                            Are you sure?
+                        </h4>
+                        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                            You are about to delete <strong>{{ deletingManager.name }}</strong>.
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Confirmation -->
+                <div v-if="deleteStep === 2" class="space-y-4 px-6 py-4">
+                    <div class="text-center">
+                        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+                            <i class="fa-solid fa-user-xmark text-red-600 dark:text-red-400"></i>
+                        </div>
+                        <h4 class="mt-3 text-lg font-medium text-slate-900 dark:text-slate-50">
+                            This action cannot be undone
+                        </h4>
+                        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                            The project manager account will be permanently deleted.
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Password Verification -->
+                <div v-if="deleteStep === 3" class="space-y-4 px-6 py-4">
+                    <div class="text-center">
+                        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+                            <i class="fa-solid fa-lock text-red-600 dark:text-red-400"></i>
+                        </div>
+                        <h4 class="mt-3 text-lg font-medium text-slate-900 dark:text-slate-50">
+                            Enter your password
+                        </h4>
+                        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                            Please confirm your admin password to proceed.
+                        </p>
+                    </div>
+                    <div>
+                        <input
+                            v-model="deletePassword"
+                            type="password"
+                            placeholder="Your admin password"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-red-500 focus:ring-red-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50"
+                            @keyup.enter="confirmDelete"
+                        />
+                        <p v-if="deletePasswordError" class="mt-1 text-xs text-red-600">{{ deletePasswordError }}</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-700 dark:bg-slate-800/50">
+                    <button
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+                        @click="deleteStep === 1 ? cancelDelete() : prevDeleteStep()"
+                    >
+                        <i class="fa-solid fa-arrow-left" v-if="deleteStep > 1"></i>
+                        <i class="fa-solid fa-xmark" v-else></i>
+                        {{ deleteStep === 1 ? 'Cancel' : 'Back' }}
+                    </button>
+                    <button
+                        v-if="deleteStep < 3"
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-6 py-2.5 text-sm font-medium text-white shadow-md transition hover:bg-red-700"
+                        @click="nextDeleteStep"
+                    >
+                        Continue
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                    <button
+                        v-else
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-6 py-2.5 text-sm font-medium text-white shadow-md transition hover:bg-red-700 disabled:opacity-50"
+                        :disabled="!deletePassword"
+                        @click="confirmDelete"
+                    >
+                        <i class="fa-solid fa-trash"></i>
+                        Delete Manager
+                    </button>
                 </div>
             </div>
         </div>
