@@ -57,6 +57,9 @@ class DashboardController extends Controller
             $projectsCount = $projectsQuery->count();
             $employeesCount = $employeesQuery->count();
             $itemsCount = $itemsQuery->count();
+            
+            // Count items that are not assigned to any employee (In Stock)
+            $inStockCount = $itemsQuery->whereDoesntHave('itemEmployeeAssignments')->count();
 
             $totalStockItems = $itemsQuery->count();
             $totalDistributedItems = $itemsQuery->whereNotNull('project_id')->count();
@@ -94,6 +97,7 @@ class DashboardController extends Controller
                     'employees' => $employeesCount,
                     'items' => $itemsCount,
                     'projects' => $projectsCount,
+                    'in_stock' => $inStockCount,
                     'totalStockItems' => $totalStockItems,
                     'totalDistributedItems' => $totalDistributedItems,
                 ],
@@ -111,6 +115,7 @@ class DashboardController extends Controller
                     'employees' => 0,
                     'items' => 0,
                     'projects' => 0,
+                    'in_stock' => 0,
                     'totalStockItems' => 0,
                     'totalDistributedItems' => 0,
                 ],

@@ -187,6 +187,20 @@ onUnmounted(() => {
                                     </dd>
                                 </div>
                                 <div>
+                                    <dt class="text-xs font-medium uppercase tracking-wide text-slate-600 dark:text-slate-400">Status</dt>
+                                    <dd class="mt-1.5">
+                                        <span
+                                            class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold"
+                                            :class="{
+                                                'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300': item.item_employee_assignments && item.item_employee_assignments.length > 0,
+                                                'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300': !item.item_employee_assignments || item.item_employee_assignments.length === 0,
+                                            }"
+                                        >
+                                            {{ (item.item_employee_assignments && item.item_employee_assignments.length > 0) ? 'In Use' : 'In Stock' }}
+                                        </span>
+                                    </dd>
+                                </div>
+                                <div>
                                     <dt class="text-xs font-medium uppercase tracking-wide text-slate-600 dark:text-slate-400">Owner</dt>
                                     <dd class="mt-1.5">
                                         <Link

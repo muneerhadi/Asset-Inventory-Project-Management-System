@@ -22,7 +22,7 @@ class ItemController extends Controller
         $user = $request->user();
 
         // Base query used for stats (affected by project and search, but not by status filter)
-        $baseQuery = Item::with(['category', 'status', 'currency', 'project']);
+        $baseQuery = Item::with(['category', 'status', 'currency', 'project', 'itemEmployeeAssignments']);
 
         if (! $user->isSuperAdmin()) {
             $projectIds = $user->projects()->pluck('projects.id');

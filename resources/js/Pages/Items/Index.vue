@@ -189,6 +189,7 @@ const cancelDelete = () => {
                                     <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Owner Name</th>
                                     <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Purchase Date</th>
                                     <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Situation</th>
+                                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Status</th>
                                     <th class="px-4 py-3 text-right font-semibold text-slate-900 dark:text-slate-50">Action</th>
                                 </tr>
                             </thead>
@@ -216,6 +217,17 @@ const cancelDelete = () => {
                                             }"
                                         >
                                             {{ item.status?.name ?? 'Unknown' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <span
+                                            class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap"
+                                            :class="{
+                                                'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300': item.item_employee_assignments && item.item_employee_assignments.length > 0,
+                                                'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300': !item.item_employee_assignments || item.item_employee_assignments.length === 0,
+                                            }"
+                                        >
+                                            {{ (item.item_employee_assignments && item.item_employee_assignments.length > 0) ? 'In Use' : 'In Stock' }}
                                         </span>
                                     </td>
                                     <td class="px-4 py-3 text-right">
@@ -246,7 +258,7 @@ const cancelDelete = () => {
                                     </td>
                                 </tr>
                                 <tr v-if="!items.data.length">
-                                    <td colspan="9" class="px-4 py-8 text-center text-slate-500 dark:text-slate-400">
+                                    <td colspan="10" class="px-4 py-8 text-center text-slate-500 dark:text-slate-400">
                                         <i class="fa-solid fa-inbox text-2xl mb-2 block opacity-50"></i>
                                         No items found.
                                     </td>

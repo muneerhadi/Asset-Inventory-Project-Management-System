@@ -52,7 +52,7 @@ const handleImageError = (event) => {
                 Error: {{ error }}
             </div>
             <!-- Metrics cards -->
-            <div class="grid gap-4 md:grid-cols-3">
+            <div class="grid gap-4 md:grid-cols-4">
                 <div
                     class="flex flex-col justify-between overflow-hidden rounded-xl border border-blue-200/60 bg-gradient-to-br from-blue-100/60 via-blue-50/40 to-sky-100/50 p-4 text-left shadow-md transition hover:shadow-lg dark:border-blue-900/40 dark:bg-gradient-to-br dark:from-blue-950/40 dark:via-slate-900/60 dark:to-sky-950/40"
                 >
@@ -104,6 +104,30 @@ const handleImageError = (event) => {
                         View items
                     </Link>
                 </div>
+
+                <Link
+                    :href="route('items.index')"
+                    class="flex flex-col justify-between overflow-hidden rounded-xl border border-green-200/60 bg-gradient-to-br from-green-100/60 via-emerald-50/40 to-teal-100/50 p-4 text-left shadow-md transition hover:shadow-lg dark:border-green-900/40 dark:bg-gradient-to-br dark:from-green-950/40 dark:via-slate-900/60 dark:to-teal-950/40"
+                >
+                    <div class="flex items-center justify-between">
+                        <p
+                            class="text-xs font-medium uppercase tracking-wide text-slate-600 dark:text-slate-400"
+                        >
+                            In Stock Items
+                        </p>
+                        <span class="text-green-600 dark:text-green-400">
+                            <i class="fa-solid fa-warehouse text-lg"></i>
+                        </span>
+                    </div>
+                    <p
+                        class="mt-3 text-2xl font-semibold text-slate-900 dark:text-slate-50"
+                    >
+                        {{ metrics.in_stock ?? 0 }}
+                    </p>
+                    <p class="mt-2 inline-flex items-center text-xs font-medium text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300">
+                        View items
+                    </p>
+                </Link>
 
                 <div
                     class="flex flex-col justify-between overflow-hidden rounded-xl border border-purple-200/60 bg-gradient-to-br from-purple-100/60 via-pink-50/40 to-violet-100/50 p-4 text-left shadow-md transition hover:shadow-lg dark:border-purple-900/40 dark:bg-gradient-to-br dark:from-purple-950/40 dark:via-slate-900/60 dark:to-violet-950/40"
