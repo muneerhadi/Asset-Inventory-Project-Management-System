@@ -20,12 +20,13 @@ class EmployeeController extends Controller
 
         $employeesQuery = Employee::query();
 
-        if (! $user->isSuperAdmin()) {
-            $projectIds = $user->projects()->pluck('projects.id');
-            $employeesQuery->whereHas('projects', function ($q) use ($projectIds) {
-                $q->whereIn('projects.id', $projectIds);
-            });
-        }
+        // Remove project restriction - project managers can see all employees
+        // if (! $user->isSuperAdmin()) {
+        //     $projectIds = $user->projects()->pluck('projects.id');
+        //     $employeesQuery->whereHas('projects', function ($q) use ($projectIds) {
+        //         $q->whereIn('projects.id', $projectIds);
+        //     });
+        // }
 
         if ($search = $request->string('search')->trim()) {
             $employeesQuery->where(function ($q) use ($search) {
