@@ -231,7 +231,7 @@ const toggleEditingProject = (projectId) => {
                                 <input
                                     v-model="statusForm.name"
                                     type="text"
-                                    class="mt-1 block w-full rounded-md border-gray-300 bg-white text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-slate-100 dark:text-black"
+                                    class="mt-1 block w-full rounded-md border-gray-300 bg-white text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50 dark:focus:border-indigo-400"
                                     required
                                 />
                             </div>
@@ -278,7 +278,7 @@ const toggleEditingProject = (projectId) => {
                                 <input
                                     v-model="currencyForm.code"
                                     type="text"
-                                    class="mt-1 block w-full rounded-md border-gray-300 bg-white text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-slate-100 dark:text-black"
+                                    class="mt-1 block w-full rounded-md border-gray-300 bg-white text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50 dark:focus:border-indigo-400"
                                     required
                                 />
                             </div>
@@ -287,7 +287,7 @@ const toggleEditingProject = (projectId) => {
                                 <input
                                     v-model="currencyForm.name"
                                     type="text"
-                                    class="mt-1 block w-full rounded-md border-gray-300 bg-white text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-slate-100 dark:text-black"
+                                    class="mt-1 block w-full rounded-md border-gray-300 bg-white text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50 dark:focus:border-indigo-400"
                                     required
                                 />
                             </div>
@@ -296,11 +296,11 @@ const toggleEditingProject = (projectId) => {
                                 <input
                                     v-model="currencyForm.symbol"
                                     type="text"
-                                    class="mt-1 block w-full rounded-md border-gray-300 bg-white text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-slate-100 dark:text-black"
+                                    class="mt-1 block w-full rounded-md border-gray-300 bg-white text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50 dark:focus:border-indigo-400"
                                 />
                             </div>
                             <label class="inline-flex items-center gap-1 text-xs text-gray-700 dark:text-slate-300">
-                                <input v-model="currencyForm.is_default" type="checkbox" class="rounded border-gray-300 text-indigo-600" />
+                                <input v-model="currencyForm.is_default" type="checkbox" class="rounded border-gray-300 text-indigo-600 dark:border-slate-600 dark:bg-slate-800" />
                                 Default currency
                             </label>
                             <div class="pt-2 flex justify-end">
@@ -383,13 +383,13 @@ const toggleEditingProject = (projectId) => {
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-2">Assign Projects</label>
-                                    <div class="max-h-32 overflow-y-auto border border-gray-200 rounded-md p-2 dark:border-slate-600">
+                                    <div class="max-h-32 overflow-y-auto border border-gray-200 rounded-md p-2 dark:border-slate-600 dark:bg-slate-800">
                                         <label v-for="project in projects" :key="project.id" class="flex items-center gap-2 text-xs py-1">
                                             <input
                                                 v-model="managerForm.project_ids"
                                                 :value="project.id"
                                                 type="checkbox"
-                                                class="rounded border-gray-300 text-amber-600"
+                                                class="rounded border-gray-300 text-amber-600 dark:border-slate-600 dark:bg-slate-800"
                                             />
                                             <span class="text-gray-700 dark:text-slate-300">{{ project.name }}</span>
                                         </label>
