@@ -109,8 +109,9 @@ defineProps({
                     </section>
                 </div>
 
-                <!-- Danger zone card (rose like distributed items metric) -->
+                <!-- Danger zone card (rose like distributed items metric) - Only for super admins -->
                 <section
+                    v-if="$page.props.auth.user.role === 'super_admin'"
                     class="overflow-hidden rounded-2xl border border-rose-200/70 bg-gradient-to-br from-rose-50/90 via-white to-orange-50/80 p-5 shadow-md dark:border-rose-900/50 dark:bg-gradient-to-br dark:from-rose-950/50 dark:via-slate-950 dark:to-orange-950/50"
                 >
                     <div class="mb-4 flex items-center gap-3">

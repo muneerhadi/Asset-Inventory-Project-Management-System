@@ -151,4 +151,21 @@ class SettingsController extends Controller
 
         return redirect()->route('settings.index')->with('success', 'Project manager projects updated.');
     }
+
+    public function destroyProjectManager(Request $request, User $user): RedirectResponse
+    {
+        abort_unless($user->isProjectManager(), 404);
+
+        $validated = $request->validate([
+            'password' => ['required', 'string'],
+        ]);
+
+        if (!Hash::check($validated['password'], auth()->user()->password)) {
+            return back()->withErrors(['password' => 'The provided password is incorrect.']);
+        }
+
+        $user->delete();
+
+        return redirect()->route('settings.index')->with('success', 'Project manager deleted.');
+    }
 }

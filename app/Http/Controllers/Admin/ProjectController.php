@@ -194,6 +194,21 @@ class ProjectController extends Controller
         return redirect()->route('projects.index')->with('success', 'Project deleted successfully.');
     }
 
+    public function verifyPassword(Request $request)
+    {
+        $validated = $request->validate([
+            'password' => ['required', 'string'],
+        ]);
+
+        $user = $request->user();
+        
+        if (!\Hash::check($validated['password'], $user->password)) {
+            return back()->withErrors(['password' => 'Invalid password']);
+        }
+
+        return back()->with('password_verified', true);
+    }
+
     public function exportItems(Request $request, Project $project): StreamedResponse
     {
         $user = $request->user();

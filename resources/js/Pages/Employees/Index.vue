@@ -14,6 +14,8 @@ const search = ref(props.filters?.search ?? '');
 const selectedEmployeeId = ref(null);
 const selectedItemIds = ref([]);
 const showAssignModal = ref(false);
+const showDeleteModal = ref(false);
+const employeeToDelete = ref(null);
 
 const submitSearch = () => {
     router.get(route('employees.index'), { search: search.value }, { preserveState: true, replace: true });
@@ -43,6 +45,28 @@ const assignItem = () => {
             },
         },
     );
+};
+
+const deleteEmployee = (employee) => {
+    employeeToDelete.value = employee;
+    showDeleteModal.value = true;
+};
+
+const confirmDelete = () => {
+    if (employeeToDelete.value) {
+        router.delete(route('employees.destroy', employeeToDelete.value.id), { 
+            preserveScroll: true,
+            onSuccess: () => {
+                showDeleteModal.value = false;
+                employeeToDelete.value = null;
+            }
+        });
+    }
+};
+
+const cancelDelete = () => {
+    showDeleteModal.value = false;
+    employeeToDelete.value = null;
 };
 </script>
 
@@ -141,6 +165,14 @@ const assignItem = () => {
                                                 <i class="fa-solid fa-pen text-xs"></i>
                                                 <span>Edit</span>
                                             </Link>
+                                            <button
+                                                type="button"
+                                                @click="deleteEmployee(employee)"
+                                                class="inline-flex items-center gap-1 rounded-md bg-rose-100 px-2 py-1 text-xs font-medium text-rose-700 transition hover:bg-rose-200 dark:bg-rose-900/40 dark:text-rose-300 dark:hover:bg-rose-900/60"
+                                            >
+                                                <i class="fa-solid fa-trash text-xs"></i>
+                                                <span>Delete</span>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -246,6 +278,46 @@ const assignItem = () => {
                     >
                         <i class="fa-solid fa-check"></i>
                         Assign
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 dark:bg-black/70">
+            <div class="w-full max-w-md space-y-4 rounded-xl bg-white shadow-xl dark:bg-slate-900">
+                <div class="border-b border-slate-200 bg-gradient-to-r from-red-50 to-rose-50 px-6 py-4 dark:border-slate-700 dark:from-red-950/50 dark:to-rose-950/50">
+                    <h3 class="text-lg font-semibold text-red-900 dark:text-red-100">
+                        <i class="fa-solid fa-triangle-exclamation mr-2 text-red-600 dark:text-red-400"></i>
+                        Delete Employee
+                    </h3>
+                </div>
+                <div class="px-6 py-4">
+                    <p class="text-sm text-slate-700 dark:text-slate-300 mb-4">
+                        Are you sure you want to delete this employee? This action cannot be undone.
+                    </p>
+                    <div v-if="employeeToDelete" class="bg-slate-50 dark:bg-slate-800 rounded-lg p-3">
+                        <p class="font-medium text-slate-900 dark:text-slate-50">{{ employeeToDelete.name }}</p>
+                        <p class="text-sm text-slate-600 dark:text-slate-400">Position: {{ employeeToDelete.position || 'N/A' }}</p>
+                        <p class="text-sm text-slate-600 dark:text-slate-400">Location: {{ employeeToDelete.location || 'N/A' }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-end gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-700 dark:bg-slate-800/50">
+                    <button
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+                        @click="cancelDelete"
+                    >
+                        <i class="fa-solid fa-xmark"></i>
+                        Cancel
+                    </button>
+                    <button
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 px-6 py-2.5 text-sm font-medium text-white shadow-md transition hover:shadow-lg"
+                        @click="confirmDelete"
+                    >
+                        <i class="fa-solid fa-trash"></i>
+                        Delete Employee
                     </button>
                 </div>
             </div>

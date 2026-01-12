@@ -1,6 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
+import { formatDate } from '@/utils/dateFormat';
 
 const props = defineProps({
     activities: Object,
@@ -65,9 +66,9 @@ const props = defineProps({
                                     When
                                 </th>
                                 <th
-                                    class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wide text-slate-500"
+                                    class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-500"
                                 >
-                                    Action
+                                    Details
                                 </th>
                                 <th
                                     class="px-4 py-2 text-left text-xs font-medium uppercase tracking-wide text-slate-500"
@@ -80,19 +81,69 @@ const props = defineProps({
                             <tr
                                 v-for="activity in activities.data"
                                 :key="activity.id"
-                                class="hover:bg-slate-50 dark:hover:bg-slate-900"
+                                class="hover:bg-slate-50 dark:hover:bg-slate-900 cursor-pointer transition"
+                                @click="$inertia.get(route('activities.show', activity.id))"
                             >
-                                <td class="px-4 py-2 text-xs text-slate-500">
-                                    {{ activity.created_at }}
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center gap-2">
+                                        <div :class="[
+                                            'flex h-6 w-6 items-center justify-center rounded-full text-xs',
+                                            activity.action.includes('delete') || activity.action.includes('removed')
+                                                ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400'
+                                                : activity.action.includes('create')
+                                                ? 'bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400'
+                                                : activity.action.includes('update')
+                                                ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400'
+                                                : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                                        ]">
+                                            <i :class="[
+                                                activity.action.includes('delete') || activity.action.includes('removed')
+                                                    ? 'fa-solid fa-trash'
+                                                    : activity.action.includes('create')
+                                                    ? 'fa-solid fa-plus'
+                                                    : activity.action.includes('update')
+                                                    ? 'fa-solid fa-edit'
+                                                    : 'fa-solid fa-circle-dot'
+                                            ]"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-slate-500">{{ formatDate(activity.created_at) }}</p>
+                                            <p class="text-xs font-mono text-slate-400">{{ activity.created_at }}</p>
+                                        </div>
+                                    </div>
                                 </td>
-                                <td class="px-4 py-2 text-sm text-slate-800 dark:text-slate-100">
-                                    {{ activity.action }}
+                                <td class="px-4 py-3">
+                                    <div>
+                                        <p :class="[
+                                            'text-sm font-medium',
+                                            activity.action.includes('delete') || activity.action.includes('removed')
+                                                ? 'text-red-700 dark:text-red-300'
+                                                : 'text-slate-800 dark:text-slate-100'
+                                        ]">{{ activity.action }}</p>
+                                        <p v-if="activity.description" class="text-xs text-slate-500 mt-1 truncate max-w-md">
+                                            {{ activity.description }}
+                                        </p>
+                                        <div v-if="activity.subject_type" class="mt-1">
+                                            <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-800 dark:bg-slate-800 dark:text-slate-200">
+                                                {{ activity.subject_type.split('\\').pop() }} #{{ activity.subject_id }}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </td>
-                                <td class="px-4 py-2 text-xs text-slate-500">
-                                    <span v-if="activity.user">
-                                        {{ activity.user.name }}
-                                    </span>
-                                    <span v-else class="italic text-slate-400">System</span>
+                                <td class="px-4 py-3">
+                                    <div v-if="activity.user" class="flex items-center gap-2">
+                                        <div class="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-blue-200 to-blue-300 text-xs font-medium text-blue-700 dark:from-blue-900/40 dark:to-blue-800/40 dark:text-blue-300">
+                                            {{ activity.user.name.charAt(0) }}
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-slate-900 dark:text-slate-50">{{ activity.user.name }}</p>
+                                            <p class="text-xs text-slate-500 capitalize">{{ activity.user.role.replace('_', ' ') }}</p>
+                                        </div>
+                                    </div>
+                                    <div v-else class="flex items-center gap-2 text-slate-500">
+                                        <i class="fa-solid fa-robot text-xs"></i>
+                                        <span class="text-sm italic">System</span>
+                                    </div>
                                 </td>
                             </tr>
                             <tr v-if="!activities.data || activities.data.length === 0">

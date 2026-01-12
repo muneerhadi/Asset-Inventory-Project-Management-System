@@ -40,7 +40,7 @@ class DashboardController extends Controller
 
                     $daysToDeadline = null;
                     if ($project->end_date) {
-                        $daysToDeadline = $now->diffInDays($project->end_date, false);
+                        $daysToDeadline = (int) $now->diffInDays($project->end_date, false);
                     }
 
                     return [

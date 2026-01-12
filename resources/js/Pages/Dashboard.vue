@@ -133,10 +133,11 @@ const handleImageError = (event) => {
             </div>
 
             <!-- Main dashboard content -->
-            <div class="grid gap-6 lg:grid-cols-3">
-                <div class="space-y-4 lg:col-span-2">
-                    <!-- Recent activity (big card) -->
+            <div class="grid gap-6" :class="userRole === 'project_manager' ? 'lg:grid-cols-2' : 'lg:grid-cols-3'">
+                <div class="space-y-4" :class="userRole === 'project_manager' ? 'lg:col-span-1' : 'lg:col-span-2'">
+                    <!-- Recent activity (big card) - Only for super admin -->
                     <section
+                        v-if="userRole === 'super_admin'"
                         class="overflow-hidden rounded-xl border border-sky-200/50 bg-gradient-to-b from-sky-50/80 via-white to-blue-50/60 p-4 shadow-md dark:border-sky-900/30 dark:bg-gradient-to-b dark:from-sky-950/30 dark:via-slate-900 dark:to-blue-950/20"
                     >
                         <div class="mb-3 flex items-center justify-between">
@@ -154,6 +155,12 @@ const handleImageError = (event) => {
                                     Recent activity
                                 </h2>
                             </div>
+                            <Link
+                                :href="route('activities.index')"
+                                class="text-xs font-medium text-sky-600 hover:text-sky-500 dark:text-sky-400 dark:hover:text-sky-300"
+                            >
+                                View all
+                            </Link>
                         </div>
                         <ul
                             class="divide-y divide-slate-100 text-sm dark:divide-slate-800"
@@ -163,12 +170,25 @@ const handleImageError = (event) => {
                                 :key="activity.id"
                                 class="py-2"
                             >
-                                <div class="flex items-start gap-3">
+                                <Link
+                                    :href="route('activities.show', activity.id)"
+                                    class="flex items-start gap-3 rounded-lg p-2 transition hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                                >
                                     <div
-                                        class="mt-1 flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-300"
+                                        :class="[
+                                            'mt-1 flex h-7 w-7 items-center justify-center rounded-full text-slate-500 dark:text-slate-300',
+                                            activity.action.includes('delete') || activity.action.includes('removed')
+                                                ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400'
+                                                : 'bg-slate-100 dark:bg-slate-800'
+                                        ]"
                                     >
                                         <i
-                                            class="fa-solid fa-circle-dot text-[10px]"
+                                            :class="[
+                                                'text-[10px]',
+                                                activity.action.includes('delete') || activity.action.includes('removed')
+                                                    ? 'fa-solid fa-trash'
+                                                    : 'fa-solid fa-circle-dot'
+                                            ]"
                                         ></i>
                                     </div>
                                     <div
@@ -185,7 +205,12 @@ const handleImageError = (event) => {
                                                 }}
                                             </p>
                                             <p
-                                                class="mt-0.5 text-slate-800 dark:text-slate-100"
+                                                :class="[
+                                                    'mt-0.5',
+                                                    activity.action.includes('delete') || activity.action.includes('removed')
+                                                        ? 'text-red-700 dark:text-red-300'
+                                                        : 'text-slate-800 dark:text-slate-100'
+                                                ]"
                                             >
                                                 {{ activity.action }}
                                                 <span
@@ -197,8 +222,9 @@ const handleImageError = (event) => {
                                                 </span>
                                             </p>
                                         </div>
+                                        <i class="fa-solid fa-chevron-right text-xs text-slate-400 mt-2"></i>
                                     </div>
-                                </div>
+                                </Link>
                             </li>
                             <li
                                 v-if="
@@ -212,7 +238,7 @@ const handleImageError = (event) => {
                         </ul>
                     </section>
 
-                    <div class="grid gap-4 md:grid-cols-2">
+                    <div class="grid gap-4" :class="userRole === 'project_manager' ? 'md:grid-cols-1' : 'md:grid-cols-2'">
                         <!-- Project manager-only deadlines card -->
                         <section
                             v-if="userRole === 'project_manager'"
@@ -317,8 +343,9 @@ const handleImageError = (event) => {
                             </ul>
                         </section>
 
-                        <!-- Recent employees card -->
+                        <!-- Recent employees card - Only for super admin -->
                         <section
+                            v-if="userRole === 'super_admin'"
                             class="overflow-hidden rounded-xl border border-emerald-200/50 bg-gradient-to-b from-emerald-50/80 via-white to-green-50/60 p-4 shadow-md dark:border-emerald-900/30 dark:bg-gradient-to-b dark:from-emerald-950/30 dark:via-slate-900 dark:to-green-950/20"
                         >
                             <div class="mb-3 flex items-center justify-between">
@@ -407,8 +434,9 @@ const handleImageError = (event) => {
                             </ul>
                         </section>
 
-                        <!-- Recent items card -->
+                        <!-- Recent items card - Only for super admin -->
                         <section
+                            v-if="userRole === 'super_admin'"
                             class="overflow-hidden rounded-xl border border-amber-200/50 bg-gradient-to-b from-amber-50/80 via-white to-orange-50/60 p-4 shadow-md dark:border-amber-900/30 dark:bg-gradient-to-b dark:from-amber-950/30 dark:via-slate-900 dark:to-orange-950/20"
                         >
                             <div class="mb-3 flex items-center justify-between">

@@ -25,7 +25,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('employees.assign-item');
         Route::delete('employees/{employee}/unassign-item/{assignment}', [EmployeeController::class, 'unassignItem'])
             ->name('employees.unassign-item');
-        Route::resource('projects', ProjectController::class);
+        Route::get('projects', [ProjectController::class, 'index'])->name('projects.index');
+        Route::get('projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
+        
+        // Project management routes (super admin only)
+        Route::middleware('role:super_admin')->group(function () {
+            Route::get('projects/create', [ProjectController::class, 'create'])->name('projects.create');
+            Route::post('projects', [ProjectController::class, 'store'])->name('projects.store');
+            Route::get('projects/{project}/edit', [ProjectController::class, 'edit'])->name('projects.edit');
+            Route::put('projects/{project}', [ProjectController::class, 'update'])->name('projects.update');
+            Route::delete('projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
+            Route::post('projects/verify-password', [ProjectController::class, 'verifyPassword'])
+                ->name('projects.verify-password');
+        });
         Route::get('projects/{project}/export-items', [ProjectController::class, 'exportItems'])
             ->name('projects.export-items');
         Route::post('projects/{project}/import-employees', [ProjectController::class, 'importEmployees'])
@@ -51,7 +63,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('projects/{project}/print-item-assignments', [ProjectController::class, 'printItemAssignments'])
             ->name('projects.print-item-assignments');
 
-        Route::get('activity', [ActivityController::class, 'index'])->name('activity.index');
+        Route::get('activities', [ActivityController::class, 'index'])->name('activities.index');
+        Route::get('activities/{activity}', [ActivityController::class, 'show'])->name('activities.show');
 
         // Reports
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
@@ -86,6 +99,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::post('settings/project-managers', [SettingsController::class, 'storeProjectManager'])->name('settings.project-managers.store');
         Route::post('settings/project-managers/{user}/projects', [SettingsController::class, 'updateProjectManagerProjects'])->name('settings.project-managers.projects.update');
+        Route::delete('settings/project-managers/{user}', [SettingsController::class, 'destroyProjectManager'])->name('settings.project-managers.destroy');
     });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

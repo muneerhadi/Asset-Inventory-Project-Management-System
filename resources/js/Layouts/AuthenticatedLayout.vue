@@ -92,7 +92,7 @@ const toggleTheme = () => {
                         :href="route('projects.index')"
                         :active="route().current('projects.*')"
                     >
-                        Owners
+                        {{ $page.props.auth.user.role === 'project_manager' ? 'My Projects' : 'Owners' }}
                     </ResponsiveNavLink>
                     <ResponsiveNavLink
                         :href="route('reports.index')"
@@ -288,7 +288,7 @@ const toggleTheme = () => {
                             :href="route('projects.index')"
                             :active="route().current('projects.*')"
                         >
-                            Owners
+                            {{ $page.props.auth.user.role === 'project_manager' ? 'My Projects' : 'Owners' }}
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
                             :href="route('reports.index')"
