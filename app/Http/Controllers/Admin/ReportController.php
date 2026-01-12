@@ -106,6 +106,8 @@ class ReportController extends Controller
             'status_id' => $request->integer('status_id') ?: null,
             'from' => $request->input('from'),
             'to' => $request->input('to'),
+            'price_min' => $request->input('price_min') ? (float) $request->input('price_min') : null,
+            'price_max' => $request->input('price_max') ? (float) $request->input('price_max') : null,
         ];
 
         $itemsQuery = Item::with(['status', 'category', 'project']);
@@ -129,6 +131,14 @@ class ReportController extends Controller
 
         if ($filters['to']) {
             $itemsQuery->whereDate('purchase_date', '<=', $filters['to']);
+        }
+
+        if ($filters['price_min']) {
+            $itemsQuery->where('price', '>=', $filters['price_min']);
+        }
+
+        if ($filters['price_max']) {
+            $itemsQuery->where('price', '<=', $filters['price_max']);
         }
 
         $items = $itemsQuery->orderBy('purchase_date')->get();

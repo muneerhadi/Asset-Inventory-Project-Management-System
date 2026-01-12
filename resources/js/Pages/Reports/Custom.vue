@@ -16,6 +16,8 @@ const localFilters = ref({
     status_id: props.filters.status_id ?? null,
     from: props.filters.from ?? null,
     to: props.filters.to ?? null,
+    price_min: props.filters.price_min ?? null,
+    price_max: props.filters.price_max ?? null,
 });
 
 const applyFilters = () => {
@@ -32,6 +34,8 @@ const clearFilters = () => {
         status_id: null,
         from: null,
         to: null,
+        price_min: null,
+        price_max: null,
     };
     applyFilters();
 };
@@ -48,6 +52,8 @@ watch(
             status_id: newFilters.status_id ?? null,
             from: newFilters.from ?? null,
             to: newFilters.to ?? null,
+            price_min: newFilters.price_min ?? null,
+            price_max: newFilters.price_max ?? null,
         };
     },
     { deep: true },
@@ -100,7 +106,7 @@ watch(
                             Filter Criteria
                         </h3>
                         <form
-                            class="grid gap-4 md:grid-cols-3"
+                            class="grid gap-4 md:grid-cols-4"
                             @submit.prevent="applyFilters"
                         >
                             <div class="flex flex-col">
@@ -164,6 +170,36 @@ watch(
                                 <input
                                     v-model="localFilters.to"
                                     type="date"
+                                    class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50"
+                                />
+                            </div>
+
+                            <div class="flex flex-col">
+                                <label class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    <i class="fa-solid fa-dollar-sign mr-1 text-slate-600 dark:text-slate-400"></i>
+                                    Min Price
+                                </label>
+                                <input
+                                    v-model="localFilters.price_min"
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    placeholder="0.00"
+                                    class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50"
+                                />
+                            </div>
+
+                            <div class="flex flex-col">
+                                <label class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    <i class="fa-solid fa-dollar-sign mr-1 text-slate-600 dark:text-slate-400"></i>
+                                    Max Price
+                                </label>
+                                <input
+                                    v-model="localFilters.price_max"
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    placeholder="0.00"
                                     class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50"
                                 />
                             </div>

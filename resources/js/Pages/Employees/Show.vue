@@ -9,7 +9,7 @@ const props = defineProps({
     availableItems: Array,
 });
 
-const selectedItemId = ref(null);
+const selectedItemIds = ref([]);
 const showAssignModal = ref(false);
 
 const deleteEmployee = () => {
@@ -19,14 +19,14 @@ const deleteEmployee = () => {
 };
 
 const assignItem = () => {
-    if (!selectedItemId.value) return;
+    if (selectedItemIds.value.length === 0) return;
     router.post(
         route('employees.assign-item', props.employee.id),
-        { item_id: selectedItemId.value },
+        { item_ids: selectedItemIds.value },
         {
             preserveScroll: true,
             onSuccess: () => {
-                selectedItemId.value = null;
+                selectedItemIds.value = [];
                 showAssignModal.value = false;
             },
         },
@@ -241,20 +241,33 @@ const unassignItem = (assignmentId) => {
                 <div class="space-y-4 px-6 py-4">
                     <div>
                         <label class="block text-sm font-semibold text-slate-900 dark:text-slate-50 mb-2">
-                            Select Item *
+                            Select Items *
                         </label>
-                        <select
-                            v-model="selectedItemId"
-                            class="relative w-full appearance-none rounded-lg border-2 border-slate-300 bg-white py-2.5 pl-3 pr-10 text-sm font-medium text-slate-900 shadow-sm transition-all duration-200 focus:border-sky-500 focus:outline-none focus:ring-4 focus:ring-sky-500/20 dark:border-slate-500 dark:bg-slate-800 dark:text-slate-50 dark:focus:border-sky-400"
-                        >
-                            <option :value="null" class="text-slate-500 dark:bg-slate-800 dark:text-slate-400">Select item...</option>
-                            <option v-for="item in availableItems" :key="item.id" :value="String(item.id)" class="text-slate-900 dark:bg-slate-800 dark:text-slate-50">
-                                {{ item.tag_number || item.id }} - {{ item.name }} ({{ item.category?.name || 'No category' }})
-                            </option>
-                        </select>
+                        <div class="max-h-60 overflow-y-auto border border-slate-200 rounded-lg dark:border-slate-700">
+                            <div v-for="item in availableItems" :key="item.id" class="flex items-center p-3 hover:bg-slate-50 dark:hover:bg-slate-800">
+                                <input
+                                    :id="`item-${item.id}`"
+                                    v-model="selectedItemIds"
+                                    :value="String(item.id)"
+                                    type="checkbox"
+                                    class="h-4 w-4 text-sky-600 border-slate-300 rounded focus:ring-sky-500 dark:border-slate-600 dark:bg-slate-700"
+                                />
+                                <label :for="`item-${item.id}`" class="ml-3 flex-1 text-sm cursor-pointer">
+                                    <div class="font-medium text-slate-900 dark:text-slate-50">
+                                        {{ item.tag_number || item.id }} - {{ item.name }}
+                                    </div>
+                                    <div class="text-xs text-slate-500 dark:text-slate-400">
+                                        {{ item.category?.name || 'No category' }} • {{ item.status?.name || 'No status' }}
+                                    </div>
+                                </label>
+                            </div>
+                            <div v-if="!availableItems.length" class="p-4 text-center text-slate-500 dark:text-slate-400">
+                                No available items to assign
+                            </div>
+                        </div>
                         <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
                             <i class="fa-solid fa-info-circle mr-1"></i>
-                            One item can only be assigned to one employee at a time.
+                            Select multiple items to assign to this employee.
                         </p>
                     </div>
                 </div>
@@ -262,7 +275,7 @@ const unassignItem = (assignmentId) => {
                     <button
                         type="button"
                         class="inline-flex items-center gap-2 rounded-lg bg-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
-                        @click="showAssignModal = false; selectedItemId = null"
+                        @click="showAssignModal = false; selectedItemIds = []"
                     >
                         <i class="fa-solid fa-xmark"></i>
                         Cancel
@@ -271,7 +284,7 @@ const unassignItem = (assignmentId) => {
                         type="button"
                         class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-sky-600 to-blue-600 px-6 py-2.5 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-sky-700 dark:to-blue-800"
                         @click="assignItem"
-                        :disabled="!selectedItemId"
+                        :disabled="selectedItemIds.length === 0"
                     >
                         <i class="fa-solid fa-check"></i>
                         Assign

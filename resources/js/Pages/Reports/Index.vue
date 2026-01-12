@@ -32,26 +32,7 @@ const openProjectReport = () => {
 
         <div class="py-6">
             <div class="mx-auto max-w-5xl space-y-6 sm:px-6 lg:px-8">
-                <div class="grid gap-4 md:grid-cols-3">
-                    <section class="overflow-hidden rounded-xl border border-blue-200/50 bg-gradient-to-br from-blue-100/60 via-sky-50/40 to-cyan-100/50 p-4 shadow-md transition hover:shadow-lg dark:border-blue-900/30 dark:bg-gradient-to-br dark:from-blue-950/40 dark:via-slate-900/60 dark:to-cyan-950/40">
-                        <div class="flex items-start justify-between">
-                            <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-50">Economy report</h3>
-                            <span class="text-blue-600 dark:text-blue-400">
-                                <i class="fa-solid fa-chart-pie text-lg"></i>
-                            </span>
-                        </div>
-                        <p class="mt-2 text-xs text-slate-600 dark:text-slate-400">
-                            Overall inventory value and total items, printable summary for ministry reporting.
-                        </p>
-                        <Link
-                            :href="route('reports.economy')"
-                            class="mt-3 inline-flex items-center gap-2 rounded-lg bg-sky-100 px-3 py-2 text-xs font-medium text-sky-700 transition hover:bg-sky-200 dark:bg-sky-900/40 dark:text-sky-300 dark:hover:bg-sky-900/60"
-                        >
-                            <i class="fa-solid fa-arrow-right text-xs"></i>
-                            <span>Open report</span>
-                        </Link>
-                    </section>
-
+                <div class="grid gap-4 md:grid-cols-2">
                     <section class="overflow-hidden rounded-xl border border-rose-200/50 bg-gradient-to-br from-rose-100/60 via-red-50/40 to-pink-100/50 p-4 shadow-md transition hover:shadow-lg dark:border-rose-900/30 dark:bg-gradient-to-br dark:from-rose-950/40 dark:via-slate-900/60 dark:to-pink-950/40">
                         <div class="flex items-start justify-between">
                             <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-50">Damaged items report</h3>

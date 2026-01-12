@@ -291,6 +291,182 @@ const toggleEditingProject = (projectId) => {
                         </ul>
                     </section>
                 </div>
+
+                <!-- Project Managers Section -->
+                <div class="mt-8">
+                    <section class="rounded-xl border border-amber-200/60 bg-gradient-to-br from-amber-50/80 via-white to-yellow-50/80 p-6 shadow-md dark:border-amber-900/40 dark:bg-gradient-to-br dark:from-amber-950/40 dark:via-slate-900 dark:to-yellow-950/30">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-slate-50 mb-4">
+                            <i class="fa-solid fa-users-gear mr-2 text-amber-600 dark:text-amber-400"></i>
+                            Project Managers
+                        </h3>
+                        
+                        <!-- Create New Project Manager Form -->
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-lg p-4 mb-6">
+                            <h4 class="text-sm font-semibold text-gray-900 dark:text-slate-50 mb-3">Create New Project Manager</h4>
+                            <form class="grid gap-4 md:grid-cols-2" @submit.prevent="submitManager">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300">Name *</label>
+                                    <input
+                                        v-model="managerForm.name"
+                                        type="text"
+                                        class="mt-1 block w-full rounded-md border-gray-300 bg-white text-sm text-gray-900 shadow-sm focus:border-amber-500 focus:ring-amber-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50"
+                                        required
+                                    />
+                                    <p v-if="managerForm.errors.name" class="mt-1 text-xs text-red-600">{{ managerForm.errors.name }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300">Email *</label>
+                                    <input
+                                        v-model="managerForm.email"
+                                        type="email"
+                                        class="mt-1 block w-full rounded-md border-gray-300 bg-white text-sm text-gray-900 shadow-sm focus:border-amber-500 focus:ring-amber-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50"
+                                        required
+                                    />
+                                    <p v-if="managerForm.errors.email" class="mt-1 text-xs text-red-600">{{ managerForm.errors.email }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300">Password *</label>
+                                    <input
+                                        v-model="managerForm.password"
+                                        type="password"
+                                        class="mt-1 block w-full rounded-md border-gray-300 bg-white text-sm text-gray-900 shadow-sm focus:border-amber-500 focus:ring-amber-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50"
+                                        required
+                                    />
+                                    <p v-if="managerForm.errors.password" class="mt-1 text-xs text-red-600">{{ managerForm.errors.password }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300 mb-2">Assign Projects</label>
+                                    <div class="max-h-32 overflow-y-auto border border-gray-200 rounded-md p-2 dark:border-slate-600">
+                                        <label v-for="project in projects" :key="project.id" class="flex items-center gap-2 text-xs py-1">
+                                            <input
+                                                v-model="managerForm.project_ids"
+                                                :value="project.id"
+                                                type="checkbox"
+                                                class="rounded border-gray-300 text-amber-600"
+                                            />
+                                            <span class="text-gray-700 dark:text-slate-300">{{ project.name }}</span>
+                                        </label>
+                                        <div v-if="!projects.length" class="text-xs text-gray-500 dark:text-slate-400 py-2">
+                                            No projects available
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="md:col-span-2 flex justify-end">
+                                    <button
+                                        type="submit"
+                                        class="inline-flex items-center gap-2 rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 dark:bg-amber-500 dark:hover:bg-amber-400"
+                                        :disabled="managerForm.processing"
+                                    >
+                                        <i class="fa-solid fa-user-plus text-xs"></i>
+                                        <span>Create Manager</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Existing Project Managers List -->
+                        <div class="space-y-3">
+                            <h4 class="text-sm font-semibold text-gray-900 dark:text-slate-50">Existing Project Managers</h4>
+                            <div v-if="projectManagers.length" class="grid gap-3 md:grid-cols-2">
+                                <div
+                                    v-for="manager in projectManagers"
+                                    :key="manager.id"
+                                    class="bg-white/70 dark:bg-slate-800/70 rounded-lg p-4 border border-gray-200 dark:border-slate-700"
+                                >
+                                    <div class="flex items-start justify-between mb-2">
+                                        <div>
+                                            <h5 class="font-medium text-gray-900 dark:text-slate-50">{{ manager.name }}</h5>
+                                            <p class="text-xs text-gray-600 dark:text-slate-400">{{ manager.email }}</p>
+                                        </div>
+                                        <button
+                                            @click="openEditManagerProjects(manager)"
+                                            class="text-xs px-2 py-1 bg-amber-100 text-amber-700 rounded hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-300"
+                                        >
+                                            Edit Projects
+                                        </button>
+                                    </div>
+                                    <div v-if="manager.projects && manager.projects.length" class="mt-2">
+                                        <p class="text-xs font-medium text-gray-700 dark:text-slate-300 mb-1">Assigned Projects:</p>
+                                        <div class="flex flex-wrap gap-1">
+                                            <span
+                                                v-for="project in manager.projects"
+                                                :key="project.id"
+                                                class="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded dark:bg-blue-900/30 dark:text-blue-300"
+                                            >
+                                                {{ project.name }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div v-else class="mt-2 text-xs text-gray-500 dark:text-slate-400">
+                                        No projects assigned
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-else class="text-sm text-gray-500 dark:text-slate-400 text-center py-4">
+                                No project managers created yet.
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Manager Projects Modal -->
+        <div v-if="editingManagerProjects" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 dark:bg-black/70">
+            <div class="w-full max-w-md space-y-4 rounded-xl bg-white shadow-xl dark:bg-slate-900">
+                <div class="border-b border-slate-200 bg-gradient-to-r from-amber-50 to-yellow-50 px-6 py-4 dark:border-slate-700 dark:from-slate-800 dark:to-slate-900">
+                    <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-50">
+                        <i class="fa-solid fa-diagram-project mr-2 text-amber-600 dark:text-amber-400"></i>
+                        Edit Projects for {{ editingManagerProjects.name }}
+                    </h3>
+                </div>
+                <div class="space-y-4 px-6 py-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-900 dark:text-slate-50 mb-2">
+                            Assign Projects
+                        </label>
+                        <div class="max-h-60 overflow-y-auto border border-slate-200 rounded-lg dark:border-slate-700">
+                            <div v-for="project in projects" :key="project.id" class="flex items-center p-3 hover:bg-slate-50 dark:hover:bg-slate-800">
+                                <input
+                                    :id="`project-${project.id}`"
+                                    :checked="editingProjects.includes(project.id)"
+                                    @change="toggleEditingProject(project.id)"
+                                    type="checkbox"
+                                    class="h-4 w-4 text-amber-600 border-slate-300 rounded focus:ring-amber-500 dark:border-slate-600 dark:bg-slate-700"
+                                />
+                                <label :for="`project-${project.id}`" class="ml-3 flex-1 text-sm cursor-pointer">
+                                    <div class="font-medium text-slate-900 dark:text-slate-50">
+                                        {{ project.name }}
+                                    </div>
+                                    <div class="text-xs text-slate-500 dark:text-slate-400">
+                                        {{ project.code }}
+                                    </div>
+                                </label>
+                            </div>
+                            <div v-if="!projects.length" class="p-4 text-center text-slate-500 dark:text-slate-400">
+                                No projects available
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-end gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-700 dark:bg-slate-800/50">
+                    <button
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+                        @click="editingManagerProjects = null; editingProjects = []"
+                    >
+                        <i class="fa-solid fa-xmark"></i>
+                        Cancel
+                    </button>
+                    <button
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-600 to-yellow-600 px-6 py-2.5 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-amber-700 dark:to-yellow-700"
+                        @click="submitManagerProjects"
+                    >
+                        <i class="fa-solid fa-check"></i>
+                        Update Projects
+                    </button>
+                </div>
             </div>
         </div>
     </AuthenticatedLayout>
