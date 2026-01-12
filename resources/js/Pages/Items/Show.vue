@@ -396,34 +396,34 @@ onUnmounted(() => {
                 class="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-sm p-4"
                 @click="closeImageModal"
             >
-                <div class="relative max-h-full max-w-6xl" @click.stop>
+                <div class="relative max-h-full max-w-full" @click.stop>
                     <!-- Close Button -->
                     <button
                         @click="closeImageModal"
-                        class="absolute -right-3 -top-3 z-20 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-2xl transition-all hover:scale-110 hover:bg-rose-500 hover:text-white dark:bg-slate-800 dark:text-white dark:hover:bg-rose-600"
+                        class="absolute -right-2 -top-2 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-2xl transition-all hover:scale-110 hover:bg-rose-500 hover:text-white dark:bg-slate-800 dark:text-white dark:hover:bg-rose-600"
                         aria-label="Close"
                     >
-                        <i class="fa-solid fa-times text-lg"></i>
+                        <i class="fa-solid fa-times text-sm"></i>
                     </button>
 
                     <!-- Previous Button -->
                     <button
                         v-if="getAllImages().length > 1"
                         @click.stop="prevImage"
-                        class="absolute left-4 top-1/2 z-20 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full bg-white/95 shadow-2xl backdrop-blur-sm transition-all hover:scale-110 hover:bg-amber-500 hover:text-white dark:bg-slate-800/95 dark:text-white dark:hover:bg-amber-600"
+                        class="absolute left-3 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/95 shadow-2xl backdrop-blur-sm transition-all hover:scale-110 hover:bg-amber-500 hover:text-white dark:bg-slate-800/95 dark:text-white dark:hover:bg-amber-600"
                         aria-label="Previous image"
                     >
-                        <i class="fa-solid fa-chevron-left text-xl"></i>
+                        <i class="fa-solid fa-chevron-left text-lg"></i>
                     </button>
 
                     <!-- Next Button -->
                     <button
                         v-if="getAllImages().length > 1"
                         @click.stop="nextImage"
-                        class="absolute right-4 top-1/2 z-20 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full bg-white/95 shadow-2xl backdrop-blur-sm transition-all hover:scale-110 hover:bg-amber-500 hover:text-white dark:bg-slate-800/95 dark:text-white dark:hover:bg-amber-600"
+                        class="absolute right-3 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/95 shadow-2xl backdrop-blur-sm transition-all hover:scale-110 hover:bg-amber-500 hover:text-white dark:bg-slate-800/95 dark:text-white dark:hover:bg-amber-600"
                         aria-label="Next image"
                     >
-                        <i class="fa-solid fa-chevron-right text-xl"></i>
+                        <i class="fa-solid fa-chevron-right text-lg"></i>
                     </button>
 
                     <!-- Main Image Container -->
@@ -432,7 +432,7 @@ onUnmounted(() => {
                             v-if="selectedImage"
                             :src="selectedImage"
                             :alt="`${item.name} - Image ${selectedImageIndex + 1}`"
-                            class="max-h-[90vh] max-w-full object-contain"
+                            class="max-h-[98vh] max-w-[98vw] object-contain"
                             @error="handleImageError"
                         />
                         <div v-else class="flex h-96 items-center justify-center">
@@ -446,11 +446,11 @@ onUnmounted(() => {
                     <!-- Image Counter & Info -->
                     <div
                         v-if="getAllImages().length > 1"
-                        class="absolute bottom-6 left-1/2 z-20 -translate-x-1/2 transform"
+                        class="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 transform"
                     >
-                        <div class="flex items-center gap-3 rounded-full bg-black/70 px-6 py-3 backdrop-blur-md shadow-xl">
-                            <i class="fa-solid fa-images text-amber-400"></i>
-                            <span class="text-sm font-semibold text-white">
+                        <div class="flex items-center gap-2 rounded-full bg-black/70 px-4 py-2 backdrop-blur-md shadow-xl">
+                            <i class="fa-solid fa-images text-amber-400 text-xs"></i>
+                            <span class="text-xs font-semibold text-white">
                                 Image {{ selectedImageIndex + 1 }} of {{ getAllImages().length }}
                             </span>
                         </div>
@@ -459,12 +459,12 @@ onUnmounted(() => {
                     <!-- Thumbnail Strip (if multiple images) -->
                     <div
                         v-if="getAllImages().length > 1"
-                        class="absolute bottom-0 left-0 right-0 z-10 flex justify-center gap-2 bg-gradient-to-t from-black/80 to-transparent p-4 backdrop-blur-sm"
+                        class="absolute bottom-0 left-0 right-0 z-10 flex justify-center gap-1 bg-gradient-to-t from-black/80 to-transparent p-3 backdrop-blur-sm"
                     >
                         <div
                             v-for="(img, idx) in getAllImages()"
                             :key="idx"
-                            class="h-16 w-16 cursor-pointer overflow-hidden rounded-lg border-2 transition-all"
+                            class="h-12 w-12 cursor-pointer overflow-hidden rounded-lg border-2 transition-all"
                             :class="idx === selectedImageIndex ? 'border-amber-400 shadow-lg shadow-amber-400/50 scale-110' : 'border-white/30 hover:border-white/60'"
                             @click.stop="openImageModal(img, idx)"
                         >
