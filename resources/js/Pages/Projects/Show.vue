@@ -289,7 +289,7 @@ const importItems = () => {
                                 <tr class="border-b border-slate-200 bg-slate-50/50 dark:border-slate-700 dark:bg-slate-800/50">
                                     <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">#</th>
                                     <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Name</th>
-                                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Status</th>
+                                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Situation</th>
                                     <th class="px-4 py-3 text-right font-semibold text-slate-900 dark:text-slate-50">Action</th>
                                 </tr>
                             </thead>

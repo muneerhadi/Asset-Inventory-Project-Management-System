@@ -338,4 +338,23 @@ class ItemController extends Controller
 
         return redirect()->route('items.index')->with('success', 'Item deleted successfully.');
     }
+
+    public function inStock(Request $request): Response
+    {
+        $user = $request->user();
+
+        $itemsQuery = Item::with(['category', 'status', 'currency', 'project', 'itemEmployeeAssignments'])
+            ->whereDoesntHave('itemEmployeeAssignments');
+
+        if (! $user->isSuperAdmin()) {
+            $projectIds = $user->projects()->pluck('projects.id');
+            $itemsQuery->whereIn('project_id', $projectIds);
+        }
+
+        $items = $itemsQuery->latest()->paginate(10)->withQueryString();
+
+        return Inertia::render('Items/InStock', [
+            'items' => $items,
+        ]);
+    }
 }

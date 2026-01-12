@@ -94,7 +94,7 @@ const printPage = () => {
                                         </th>
                                         <th class="px-6 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">
                                             <i class="fa-solid fa-check-circle mr-2 text-slate-600 dark:text-slate-400"></i>
-                                            Status
+                                            Situation
                                         </th>
                                         <th class="px-6 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">
                                             <i class="fa-solid fa-map-marker mr-2 text-slate-600 dark:text-slate-400"></i>
@@ -208,7 +208,7 @@ const printPage = () => {
                                     <th class="border border-slate-900 px-3 py-2 text-left font-bold">Tag</th>
                                     <th class="border border-slate-900 px-3 py-2 text-left font-bold">Name</th>
                                     <th class="border border-slate-900 px-3 py-2 text-left font-bold">Type</th>
-                                    <th class="border border-slate-900 px-3 py-2 text-left font-bold">Status</th>
+                                    <th class="border border-slate-900 px-3 py-2 text-left font-bold">Situation</th>
                                     <th class="border border-slate-900 px-3 py-2 text-left font-bold">Location</th>
                                     <th class="border border-slate-900 px-3 py-2 text-left font-bold">Price</th>
                                     <th class="border border-slate-900 px-3 py-2 text-left font-bold">Purchase Date</th>

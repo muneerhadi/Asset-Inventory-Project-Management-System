@@ -106,7 +106,7 @@ const handleImageError = (event) => {
                 </div>
 
                 <Link
-                    :href="route('items.index')"
+                    :href="route('items.in-stock')"
                     class="flex flex-col justify-between overflow-hidden rounded-xl border border-green-200/60 bg-gradient-to-br from-green-100/60 via-emerald-50/40 to-teal-100/50 p-4 text-left shadow-md transition hover:shadow-lg dark:border-green-900/40 dark:bg-gradient-to-br dark:from-green-950/40 dark:via-slate-900/60 dark:to-teal-950/40"
                 >
                     <div class="flex items-center justify-between">

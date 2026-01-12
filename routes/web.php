@@ -20,6 +20,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Shared between super admins and project managers, with data filtered in controllers
     Route::middleware('role:super_admin,project_manager')->group(function () {
         Route::resource('items', ItemController::class);
+        Route::get('items-in-stock', [ItemController::class, 'inStock'])->name('items.in-stock');
         Route::resource('employees', EmployeeController::class);
         Route::post('employees/{employee}/assign-item', [EmployeeController::class, 'assignItem'])
             ->name('employees.assign-item');
