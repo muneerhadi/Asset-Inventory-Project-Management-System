@@ -57,6 +57,7 @@ const form = useForm({
     remarks: props.item.remarks ?? '',
     images: [],
     images_to_keep: [], // Track which existing images to keep
+    pdf_file: null,
 });
 
 const handleImageUpload = (event) => {
@@ -103,6 +104,17 @@ const removeImage = (index) => {
     }
     // Remove from previews
     imagePreviews.value.splice(index, 1);
+};
+
+const handlePdfUpload = (event) => {
+    const file = event.target.files[0];
+    if (file && file.type === 'application/pdf') {
+        form.pdf_file = file;
+    }
+};
+
+const removePdf = () => {
+    form.pdf_file = null;
 };
 
 const submit = () => {
@@ -472,6 +484,48 @@ const submit = () => {
                                 >
                                     <i class="fa-solid fa-info-circle mr-1"></i>
                                     No images uploaded. You can add up to {{ maxImages }} images.
+                                </p>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium uppercase tracking-wide text-slate-600 dark:text-slate-400 mb-2">
+                                    PDF Document
+                                </label>
+                                <div v-if="item.pdf_path && !form.pdf_file" class="mb-2 flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800">
+                                    <i class="fa-solid fa-file-pdf text-red-500"></i>
+                                    <span class="text-sm text-slate-700 dark:text-slate-300">Current PDF Document</span>
+                                    <a :href="item.pdf_path" target="_blank" class="ml-auto text-blue-500 hover:text-blue-700">
+                                        <i class="fa-solid fa-external-link"></i>
+                                    </a>
+                                </div>
+                                <div v-if="form.pdf_file" class="mb-2 flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800">
+                                    <i class="fa-solid fa-file-pdf text-red-500"></i>
+                                    <span class="text-sm text-slate-700 dark:text-slate-300">{{ form.pdf_file.name }}</span>
+                                    <button
+                                        type="button"
+                                        @click="removePdf"
+                                        class="ml-auto text-rose-500 hover:text-rose-700"
+                                    >
+                                        <i class="fa-solid fa-times"></i>
+                                    </button>
+                                </div>
+                                <label
+                                    v-if="!form.pdf_file"
+                                    class="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-300 bg-gradient-to-br from-slate-50 to-slate-100 px-4 py-6 text-center transition hover:border-red-500 hover:bg-red-50/30 dark:border-slate-600 dark:from-slate-800/50 dark:to-slate-900/50 dark:hover:border-red-400 dark:hover:bg-red-900/10"
+                                >
+                                    <i class="fa-solid fa-file-pdf text-2xl text-red-400 dark:text-red-500"></i>
+                                    <p class="mt-2 text-xs font-medium text-slate-700 dark:text-slate-300">
+                                        {{ item.pdf_path ? 'Replace PDF Document' : 'Upload PDF Document' }}
+                                    </p>
+                                    <input
+                                        type="file"
+                                        class="hidden"
+                                        accept=".pdf"
+                                        @change="handlePdfUpload"
+                                    />
+                                </label>
+                                <p v-if="form.errors.pdf_file" class="mt-1 text-xs text-rose-600 dark:text-rose-400">
+                                    {{ form.errors.pdf_file }}
                                 </p>
                             </div>
 

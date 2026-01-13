@@ -321,6 +321,29 @@ onUnmounted(() => {
                                 No employees assigned.
                             </div>
                         </div>
+
+                        <!-- PDF Document -->
+                        <div v-if="item.pdf_path" class="rounded-xl border border-slate-200/50 bg-white/70 p-6 shadow-md dark:border-slate-700/50 dark:bg-slate-900/70">
+                            <div class="mb-4 flex items-center gap-2">
+                                <i class="fa-solid fa-file-pdf text-red-600 dark:text-red-400"></i>
+                                <h2 class="text-lg font-semibold text-slate-900 dark:text-slate-50">PDF Document</h2>
+                            </div>
+                            <div class="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800">
+                                <i class="fa-solid fa-file-pdf text-2xl text-red-500"></i>
+                                <div class="flex-1">
+                                    <p class="font-medium text-slate-900 dark:text-slate-50">Item Document</p>
+                                    <p class="text-sm text-slate-600 dark:text-slate-400">PDF file attached to this item</p>
+                                </div>
+                                <a
+                                    :href="item.pdf_path"
+                                    target="_blank"
+                                    class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:shadow-lg"
+                                >
+                                    <i class="fa-solid fa-external-link"></i>
+                                    <span>View PDF</span>
+                                </a>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Sidebar -->

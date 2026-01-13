@@ -31,6 +31,7 @@ class Item extends Model
         'remarks',
         'image_path',
         'images',
+        'pdf_path',
     ];
 
     protected $casts = [

@@ -117,6 +117,7 @@ class ItemController extends Controller
             'remarks' => ['nullable', 'string'],
             'images' => ['nullable', 'array'],
             'images.*' => ['image', 'max:20480'], // 20MB per image
+            'pdf_file' => ['nullable', 'file', 'mimes:pdf', 'max:10240'], // 10MB max
         ]);
 
         // Auto-generate item code if not provided
@@ -130,6 +131,12 @@ class ItemController extends Controller
                 $nextNumber++;
                 $validated['item_code'] = 'ITEM-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
             }
+        }
+
+        // Handle PDF file
+        if ($request->hasFile('pdf_file')) {
+            $path = $request->file('pdf_file')->store('items/pdfs', 'public');
+            $validated['pdf_path'] = '/storage/'.$path;
         }
 
         // Handle multiple images
@@ -246,7 +253,14 @@ class ItemController extends Controller
             'images' => ['nullable', 'array'],
             'images.*' => ['image', 'max:20480'], // 20MB per image
             'image' => ['nullable', 'image', 'max:2048'],
+            'pdf_file' => ['nullable', 'file', 'mimes:pdf', 'max:10240'], // 10MB max
         ]);
+
+        // Handle PDF file
+        if ($request->hasFile('pdf_file')) {
+            $path = $request->file('pdf_file')->store('items/pdfs', 'public');
+            $validated['pdf_path'] = '/storage/'.$path;
+        }
 
         // Handle multiple images - use images_to_keep if provided, otherwise keep all existing
         $imagesToKeep = $request->input('images_to_keep', []);
