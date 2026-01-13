@@ -339,6 +339,127 @@ class ItemController extends Controller
         return redirect()->route('items.index')->with('success', 'Item deleted successfully.');
     }
 
+    public function import(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'file' => ['required', 'file', 'mimes:csv,xlsx,xls'],
+        ]);
+
+        try {
+            $path = $validated['file']->getRealPath();
+            $handle = fopen($path, 'r');
+
+            if (!$handle) {
+                return redirect()->back()->with('error', 'Unable to open uploaded file.');
+            }
+
+            $header = fgetcsv($handle);
+            if (!$header) {
+                fclose($handle);
+                return redirect()->back()->with('error', 'File is empty or invalid.');
+            }
+
+            $map = [];
+            foreach ($header as $index => $column) {
+                $map[strtolower(trim($column))] = $index;
+            }
+
+            $created = 0;
+            $errors = [];
+            $duplicates = [];
+
+            while (($row = fgetcsv($handle)) !== false) {
+                $get = function (string $key) use ($map, $row) {
+                    $key = strtolower($key);
+                    if (!array_key_exists($key, $map)) {
+                        return null;
+                    }
+                    return trim($row[$map[$key]] ?? '') ?: null;
+                };
+
+                $tagNumber = $get('tag_number');
+                $name = $get('name');
+
+                if (!$tagNumber || !$name) {
+                    continue;
+                }
+
+                // Check for duplicate tag number
+                if (Item::where('tag_number', $tagNumber)->exists()) {
+                    $duplicates[] = $tagNumber;
+                    continue;
+                }
+
+                try {
+                    $categoryName = $get('category');
+                    $statusName = $get('status');
+                    $currencyCode = $get('currency');
+                    $projectName = $get('project');
+
+                    $category = $categoryName ? ItemCategory::firstOrCreate(['name' => $categoryName]) : ItemCategory::first();
+                    $status = $statusName ? ItemStatus::where('name', $statusName)->first() : ItemStatus::where('is_default', true)->first();
+                    $currency = $currencyCode ? Currency::where('code', $currencyCode)->first() : null;
+                    $project = $projectName ? Project::where('name', $projectName)->first() : null;
+
+                    if (!$category) {
+                        $category = ItemCategory::create(['name' => 'General']);
+                    }
+                    if (!$status) {
+                        $status = ItemStatus::create(['name' => 'Active', 'slug' => 'active', 'is_default' => true]);
+                    }
+
+                    Item::create([
+                        'item_code' => $tagNumber,
+                        'tag_number' => $tagNumber,
+                        'name' => $name,
+                        'description' => $get('description'),
+                        'item_category_id' => $category->id,
+                        'item_status_id' => $status->id,
+                        'price' => ($price = $get('price')) ? (float) $price : null,
+                        'currency_id' => $currency?->id,
+                        'purchase_date' => $get('purchase_date') ?: null,
+                        'location' => $get('location'),
+                        'model' => $get('model'),
+                        'serial_number' => $get('serial_number'),
+                        'project_id' => $project?->id,
+                        'remarks' => $get('remarks') ?: 'Imported from Excel',
+                    ]);
+
+                    $created++;
+                } catch (\Exception $e) {
+                    $errors[] = "Row with tag {$tagNumber}: " . $e->getMessage();
+                }
+            }
+
+            fclose($handle);
+
+            Activity::create([
+                'user_id' => $user->id,
+                'action' => 'items_imported',
+                'description' => $created . ' items imported from Excel file',
+                'subject_type' => Item::class,
+                'subject_id' => null,
+            ]);
+
+            $message = $created . ' items imported successfully.';
+            if (!empty($duplicates)) {
+                $message .= ' Skipped ' . count($duplicates) . ' duplicate tag numbers: ' . implode(', ', array_slice($duplicates, 0, 5));
+                if (count($duplicates) > 5) {
+                    $message .= ' and ' . (count($duplicates) - 5) . ' more.';
+                }
+            }
+            if (!empty($errors)) {
+                $message .= ' ' . count($errors) . ' items had errors and were skipped.';
+            }
+
+            return redirect()->route('items.index')->with('success', $message);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error processing file: ' . $e->getMessage());
+        }
+    }
+
     public function inStock(Request $request): Response
     {
         $user = $request->user();

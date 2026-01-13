@@ -7,6 +7,7 @@ use App\Models\Activity;
 use App\Models\Employee;
 use App\Models\Item;
 use App\Models\ItemEmployeeAssignment;
+use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -264,5 +265,122 @@ class EmployeeController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Item unassigned from employee successfully.');
+    }
+
+    public function import(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'file' => ['required', 'file', 'mimes:csv,xlsx,xls'],
+        ]);
+
+        try {
+            $path = $validated['file']->getRealPath();
+            $handle = fopen($path, 'r');
+
+            if (!$handle) {
+                return redirect()->back()->with('error', 'Unable to open uploaded file.');
+            }
+
+            $header = fgetcsv($handle);
+            if (!$header) {
+                fclose($handle);
+                return redirect()->back()->with('error', 'File is empty or invalid.');
+            }
+
+            $map = [];
+            foreach ($header as $index => $column) {
+                $map[strtolower(trim($column))] = $index;
+            }
+
+            $created = 0;
+            $errors = [];
+            $duplicates = [];
+
+            while (($row = fgetcsv($handle)) !== false) {
+                $get = function (string $key) use ($map, $row) {
+                    $key = strtolower($key);
+                    if (!array_key_exists($key, $map)) {
+                        return null;
+                    }
+                    return trim($row[$map[$key]] ?? '') ?: null;
+                };
+
+                $name = $get('name');
+                $email = $get('email');
+
+                if (!$name || !$email) {
+                    continue;
+                }
+
+                // Check for duplicate email
+                if (Employee::where('email', $email)->exists()) {
+                    $duplicates[] = $email;
+                    continue;
+                }
+
+                try {
+                    $projectName = $get('project');
+                    $project = $projectName ? Project::where('name', $projectName)->first() : null;
+
+                    // Auto-generate employee code
+                    $lastEmployee = Employee::orderBy('id', 'desc')->first();
+                    $nextNumber = $lastEmployee ? $lastEmployee->id + 1 : 1;
+                    $employeeCode = 'EMP-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+                    
+                    // Ensure uniqueness
+                    while (Employee::where('employee_code', $employeeCode)->exists()) {
+                        $nextNumber++;
+                        $employeeCode = 'EMP-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+                    }
+
+                    $employee = Employee::create([
+                        'employee_code' => $employeeCode,
+                        'name' => $name,
+                        'email' => $email,
+                        'phone' => $get('phone'),
+                        'position' => $get('position'),
+                        'location' => $get('location'),
+                        'address' => $get('department'), // Using department as address if needed
+                        // Add other fields as needed
+                    ]);
+
+                    // Attach to project if specified
+                    if ($project) {
+                        $employee->projects()->attach($project->id);
+                    }
+
+                    $created++;
+                } catch (\Exception $e) {
+                    $errors[] = "Row with email {$email}: " . $e->getMessage();
+                }
+            }
+
+            fclose($handle);
+
+            Activity::create([
+                'user_id' => $user->id,
+                'action' => 'employees_imported',
+                'description' => $created . ' employees imported from Excel file',
+                'subject_type' => Employee::class,
+                'subject_id' => null,
+            ]);
+
+            $message = $created . ' employees imported successfully.';
+            if (!empty($duplicates)) {
+                $message .= ' Skipped ' . count($duplicates) . ' duplicate emails: ' . implode(', ', array_slice($duplicates, 0, 5));
+                if (count($duplicates) > 5) {
+                    $message .= ' and ' . (count($duplicates) - 5) . ' more.';
+                }
+            }
+            if (!empty($errors)) {
+                $message .= ' ' . count($errors) . ' employees had errors and were skipped.';
+            }
+
+            return redirect()->route('employees.index')->with('success', $message);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error processing file: ' . $e->getMessage());
+        }
     }
 }

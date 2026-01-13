@@ -14,6 +14,9 @@ const search = ref(props.filters?.search ?? '');
 const activeStatus = ref(props.filters?.status ?? '');
 const showDeleteModal = ref(false);
 const itemToDelete = ref(null);
+const showImportModal = ref(false);
+const importFile = ref(null);
+const isImporting = ref(false);
 
 // Live search functionality
 watch(search, (newValue) => {
@@ -63,6 +66,38 @@ const cancelDelete = () => {
     showDeleteModal.value = false;
     itemToDelete.value = null;
 };
+
+const openImportModal = () => {
+    showImportModal.value = true;
+};
+
+const closeImportModal = () => {
+    showImportModal.value = false;
+    importFile.value = null;
+};
+
+const handleFileChange = (event) => {
+    importFile.value = event.target.files[0];
+};
+
+const importItems = () => {
+    if (!importFile.value) return;
+    
+    isImporting.value = true;
+    const formData = new FormData();
+    formData.append('file', importFile.value);
+    
+    router.post(route('items.import'), formData, {
+        preserveScroll: true,
+        onSuccess: () => {
+            closeImportModal();
+            isImporting.value = false;
+        },
+        onError: () => {
+            isImporting.value = false;
+        }
+    });
+};
 </script>
 
 <template>
@@ -79,13 +114,23 @@ const cancelDelete = () => {
                         Inventory List
                     </h1>
                 </div>
-                <Link
-                    :href="route('items.create')"
-                    class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-sky-600 to-blue-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-sky-700 dark:to-blue-800"
-                >
-                    <i class="fa-solid fa-plus"></i>
-                    <span>New item</span>
-                </Link>
+                <div class="flex gap-2">
+                    <button
+                        type="button"
+                        @click="openImportModal"
+                        class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-green-700 dark:to-emerald-800"
+                    >
+                        <i class="fa-solid fa-file-import"></i>
+                        <span>Import</span>
+                    </button>
+                    <Link
+                        :href="route('items.create')"
+                        class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-sky-600 to-blue-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-sky-700 dark:to-blue-800"
+                    >
+                        <i class="fa-solid fa-plus"></i>
+                        <span>New item</span>
+                    </Link>
+                </div>
             </div>
         </template>
 
@@ -344,6 +389,68 @@ const cancelDelete = () => {
                     >
                         <i class="fa-solid fa-trash"></i>
                         Delete Item
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Import Items Modal -->
+        <div v-if="showImportModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 dark:bg-black/70">
+            <div class="w-full max-w-lg space-y-4 rounded-xl bg-white shadow-xl dark:bg-slate-900">
+                <div class="border-b border-slate-200 bg-gradient-to-r from-green-50 to-emerald-50 px-6 py-4 dark:border-slate-700 dark:from-green-950/50 dark:to-emerald-950/50">
+                    <h3 class="text-lg font-semibold text-green-900 dark:text-green-100">
+                        <i class="fa-solid fa-file-import mr-2 text-green-600 dark:text-green-400"></i>
+                        Import Items from Excel
+                    </h3>
+                </div>
+                <div class="px-6 py-4">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                            Select Excel File (.xlsx, .csv)
+                        </label>
+                        <input
+                            type="file"
+                            accept=".xlsx,.xls,.csv"
+                            @change="handleFileChange"
+                            class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700 hover:file:bg-green-100 dark:file:bg-green-900/20 dark:file:text-green-300"
+                        />
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 dark:bg-blue-950/20 dark:border-blue-800">
+                        <h4 class="font-medium text-blue-800 dark:text-blue-200 mb-2">
+                            <i class="fa-solid fa-info-circle mr-1"></i>
+                            Excel File Format
+                        </h4>
+                        <p class="text-sm text-blue-700 dark:text-blue-300 mb-2">
+                            Your Excel file should have the following columns:
+                        </p>
+                        <div class="text-xs text-blue-600 dark:text-blue-400 font-mono bg-blue-100 dark:bg-blue-900/30 p-2 rounded">
+                            tag_number | name | description | category | status | price | currency | purchase_date | location | model | serial_number | project | remarks
+                        </div>
+                        <p class="text-xs text-blue-600 dark:text-blue-400 mt-2">
+                            <strong>Required:</strong> tag_number, name<br>
+                            <strong>Note:</strong> Duplicate tag numbers will be rejected
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-end gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-700 dark:bg-slate-800/50">
+                    <button
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+                        @click="closeImportModal"
+                        :disabled="isImporting"
+                    >
+                        <i class="fa-solid fa-xmark"></i>
+                        Cancel
+                    </button>
+                    <button
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-2.5 text-sm font-medium text-white shadow-md transition hover:shadow-lg disabled:opacity-50"
+                        @click="importItems"
+                        :disabled="!importFile || isImporting"
+                    >
+                        <i v-if="isImporting" class="fa-solid fa-spinner fa-spin"></i>
+                        <i v-else class="fa-solid fa-upload"></i>
+                        {{ isImporting ? 'Importing...' : 'Import Items' }}
                     </button>
                 </div>
             </div>
