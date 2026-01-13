@@ -27,9 +27,8 @@ class DashboardController extends Controller
 
                 $projectsQuery = Project::whereIn('id', $projectIds);
                 $itemsQuery = Item::whereIn('project_id', $projectIds);
-                $employeesQuery = Employee::whereHas('projects', function ($q) use ($projectIds) {
-                    $q->whereIn('projects.id', $projectIds);
-                });
+                // Project managers can see all employees
+                $employeesQuery = Employee::query();
             }
 
             // For project managers, compute per-project deadlines

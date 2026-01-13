@@ -63,6 +63,22 @@ const toggleStatus = (statusId) => {
         localFilters.value.status_ids.push(statusId);
     }
 };
+
+const toggleAllProjects = () => {
+    if (localFilters.value.project_ids.length === props.projects.length) {
+        localFilters.value.project_ids = [];
+    } else {
+        localFilters.value.project_ids = props.projects.map(p => p.id);
+    }
+};
+
+const toggleAllStatuses = () => {
+    if (localFilters.value.status_ids.length === props.statuses.length) {
+        localFilters.value.status_ids = [];
+    } else {
+        localFilters.value.status_ids = props.statuses.map(s => s.id);
+    }
+};
 </script>
 
 <template>
@@ -120,6 +136,19 @@ const toggleStatus = (statusId) => {
                                     Projects
                                 </label>
                                 <div class="max-h-32 overflow-y-auto border border-slate-300 rounded-lg bg-white dark:border-slate-600 dark:bg-slate-800">
+                                    <div class="flex items-center p-2 border-b border-slate-200 bg-slate-50 dark:border-slate-600 dark:bg-slate-700">
+                                        <input
+                                            id="select-all-projects"
+                                            type="checkbox"
+                                            :checked="localFilters.project_ids.length === projects.length && projects.length > 0"
+                                            :indeterminate="localFilters.project_ids.length > 0 && localFilters.project_ids.length < projects.length"
+                                            @change="toggleAllProjects"
+                                            class="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700"
+                                        />
+                                        <label for="select-all-projects" class="ml-2 text-sm font-medium text-slate-900 dark:text-slate-50 cursor-pointer">
+                                            Select All
+                                        </label>
+                                    </div>
                                     <div v-for="project in projects" :key="project.id" class="flex items-center p-2 hover:bg-slate-50 dark:hover:bg-slate-700">
                                         <input
                                             :id="`filter-project-${project.id}`"
@@ -144,14 +173,18 @@ const toggleStatus = (statusId) => {
                                     <i class="fa-solid fa-circle-check mr-1 text-slate-600 dark:text-slate-400"></i>
                                     Status
                                 </label>
-                                <select
-                                    v-model="localFilters.assignment_status"
-                                    class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50"
-                                >
-                                    <option :value="null">All statuses</option>
-                                    <option value="In Stock">In Stock</option>
-                                    <option value="In Use">In Use</option>
-                                </select>
+                                <div class="max-h-32 overflow-y-auto border border-slate-300 rounded-lg bg-white dark:border-slate-600 dark:bg-slate-800">
+                                    <div class="flex items-center p-2">
+                                        <select
+                                            v-model="localFilters.assignment_status"
+                                            class="w-full rounded border border-slate-300 bg-white px-2 py-1 text-sm text-slate-900 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-50"
+                                        >
+                                            <option :value="null">All statuses</option>
+                                            <option value="In Stock">In Stock</option>
+                                            <option value="In Use">In Use</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="flex flex-col">
@@ -160,6 +193,19 @@ const toggleStatus = (statusId) => {
                                     Situations
                                 </label>
                                 <div class="max-h-32 overflow-y-auto border border-slate-300 rounded-lg bg-white dark:border-slate-600 dark:bg-slate-800">
+                                    <div class="flex items-center p-2 border-b border-slate-200 bg-slate-50 dark:border-slate-600 dark:bg-slate-700">
+                                        <input
+                                            id="select-all-statuses"
+                                            type="checkbox"
+                                            :checked="localFilters.status_ids.length === statuses.length && statuses.length > 0"
+                                            :indeterminate="localFilters.status_ids.length > 0 && localFilters.status_ids.length < statuses.length"
+                                            @change="toggleAllStatuses"
+                                            class="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700"
+                                        />
+                                        <label for="select-all-statuses" class="ml-2 text-sm font-medium text-slate-900 dark:text-slate-50 cursor-pointer">
+                                            Select All
+                                        </label>
+                                    </div>
                                     <div v-for="status in statuses" :key="status.id" class="flex items-center p-2 hover:bg-slate-50 dark:hover:bg-slate-700">
                                         <input
                                             :id="`filter-status-${status.id}`"

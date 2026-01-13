@@ -24,6 +24,14 @@ const toggleProject = (projectId) => {
         selectedProjectIds.value.push(projectId);
     }
 };
+
+const toggleAllProjects = () => {
+    if (selectedProjectIds.value.length === props.projects.length) {
+        selectedProjectIds.value = [];
+    } else {
+        selectedProjectIds.value = props.projects.map(p => p.id);
+    }
+};
 </script>
 
 <template>
@@ -78,6 +86,19 @@ const toggleProject = (projectId) => {
                                 Select Projects
                             </label>
                             <div class="max-h-32 overflow-y-auto border border-slate-200 rounded-lg dark:border-slate-700">
+                                <div class="flex items-center p-2 border-b border-slate-200 bg-slate-50 dark:border-slate-600 dark:bg-slate-700">
+                                    <input
+                                        id="select-all-projects-report"
+                                        type="checkbox"
+                                        :checked="selectedProjectIds.length === projects.length && projects.length > 0"
+                                        :indeterminate="selectedProjectIds.length > 0 && selectedProjectIds.length < projects.length"
+                                        @change="toggleAllProjects"
+                                        class="h-3 w-3 text-purple-600 border-slate-300 rounded focus:ring-purple-500 dark:border-slate-600 dark:bg-slate-700"
+                                    />
+                                    <label for="select-all-projects-report" class="ml-2 text-xs font-medium text-slate-900 dark:text-slate-50 cursor-pointer">
+                                        Select All
+                                    </label>
+                                </div>
                                 <div v-for="project in projects" :key="project.id" class="flex items-center p-2 hover:bg-slate-50 dark:hover:bg-slate-800">
                                     <input
                                         :id="`project-${project.id}`"

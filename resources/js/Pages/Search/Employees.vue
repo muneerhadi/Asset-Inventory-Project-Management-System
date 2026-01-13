@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link, router } from "@inertiajs/vue3";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 
 const props = defineProps({
     employees: Array,
@@ -10,16 +10,18 @@ const props = defineProps({
 
 const search = ref(props.q || "");
 
-const submitSearch = () => {
+// Live search functionality
+watch(search, (newValue) => {
     router.get(
         route("search.employees"),
-        { q: search.value },
-        {
-            preserveState: true,
-            preserveScroll: true,
-            replace: true,
-        }
+        { q: newValue || undefined },
+        { preserveState: true, replace: true },
     );
+}, { debounce: 300 });
+
+const clearSearch = () => {
+    search.value = '';
+    router.get(route('search.employees'), {}, { preserveState: true, replace: true });
 };
 </script>
 
@@ -75,21 +77,23 @@ const submitSearch = () => {
 
                 <form
                     class="flex gap-2 rounded-xl border border-slate-200/50 bg-white/70 p-4 shadow-md dark:border-slate-700/50 dark:bg-slate-900/70"
-                    @submit.prevent="submitSearch"
                 >
-                    <input
-                        v-model="search"
-                        type="text"
-                        placeholder="Search by name, location, or position"
-                        class="flex-1 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 placeholder-slate-500 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-50 dark:placeholder-slate-400 dark:focus:border-sky-400"
-                    />
-                    <button
-                        type="submit"
-                        class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-sky-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-blue-700 dark:to-sky-700"
-                    >
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <span>Search</span>
-                    </button>
+                    <div class="flex-1 relative">
+                        <input
+                            v-model="search"
+                            type="text"
+                            placeholder="Search by name, location, or position"
+                            class="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 pr-10 text-sm text-slate-900 placeholder-slate-500 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-50 dark:placeholder-slate-400 dark:focus:border-sky-400"
+                        />
+                        <button
+                            v-if="search"
+                            type="button"
+                            @click="clearSearch"
+                            class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
+                        >
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                    </div>
                 </form>
 
                 <div

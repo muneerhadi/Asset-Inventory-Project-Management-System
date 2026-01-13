@@ -337,6 +337,15 @@ const toggleTheme = () => {
                         <slot />
                     </div>
                 </main>
+
+                <!-- Footer -->
+                <footer class="border-t border-slate-200/70 bg-white/80 px-4 py-4 text-center text-xs text-slate-600 backdrop-blur dark:border-slate-800/70 dark:bg-slate-900/80 dark:text-slate-400 print:hidden">
+                    <div class="mx-auto max-w-7xl">
+                        <p>
+                            © {{ new Date().getFullYear() }} Union Aid Inventory Management System. All rights reserved to Muneer Hadi.
+                        </p>
+                    </div>
+                </footer>
             </div>
         </div>
     </div>
