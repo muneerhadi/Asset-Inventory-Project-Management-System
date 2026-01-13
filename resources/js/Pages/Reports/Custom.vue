@@ -12,8 +12,8 @@ const props = defineProps({
 });
 
 const localFilters = ref({
-    project_id: props.filters.project_id ?? null,
-    status_id: props.filters.status_id ?? null,
+    project_ids: props.filters.project_ids ? (Array.isArray(props.filters.project_ids) ? props.filters.project_ids : [props.filters.project_ids]) : [],
+    status_ids: props.filters.status_ids ? (Array.isArray(props.filters.status_ids) ? props.filters.status_ids : [props.filters.status_ids]) : [],
     assignment_status: props.filters.assignment_status ?? null,
     from: props.filters.from ?? null,
     to: props.filters.to ?? null,
@@ -31,8 +31,8 @@ const applyFilters = () => {
 
 const clearFilters = () => {
     localFilters.value = {
-        project_id: null,
-        status_id: null,
+        project_ids: [],
+        status_ids: [],
         assignment_status: null,
         from: null,
         to: null,
@@ -46,21 +46,23 @@ const printPage = () => {
     window.print();
 };
 
-watch(
-    () => props.filters,
-    (newFilters) => {
-        localFilters.value = {
-            project_id: newFilters.project_id ?? null,
-            status_id: newFilters.status_id ?? null,
-            assignment_status: newFilters.assignment_status ?? null,
-            from: newFilters.from ?? null,
-            to: newFilters.to ?? null,
-            price_min: newFilters.price_min ?? null,
-            price_max: newFilters.price_max ?? null,
-        };
-    },
-    { deep: true },
-);
+const toggleProject = (projectId) => {
+    const index = localFilters.value.project_ids.indexOf(projectId);
+    if (index > -1) {
+        localFilters.value.project_ids.splice(index, 1);
+    } else {
+        localFilters.value.project_ids.push(projectId);
+    }
+};
+
+const toggleStatus = (statusId) => {
+    const index = localFilters.value.status_ids.indexOf(statusId);
+    if (index > -1) {
+        localFilters.value.status_ids.splice(index, 1);
+    } else {
+        localFilters.value.status_ids.push(statusId);
+    }
+};
 </script>
 
 <template>
@@ -115,21 +117,26 @@ watch(
                             <div class="flex flex-col">
                                 <label class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                                     <i class="fa-solid fa-folder mr-1 text-slate-600 dark:text-slate-400"></i>
-                                    Project
+                                    Projects
                                 </label>
-                                <select
-                                    v-model="localFilters.project_id"
-                                    class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50"
-                                >
-                                    <option :value="null">All projects</option>
-                                    <option
-                                        v-for="project in projects"
-                                        :key="project.id"
-                                        :value="project.id"
-                                    >
-                                        {{ project.code }} - {{ project.name }}
-                                    </option>
-                                </select>
+                                <div class="max-h-32 overflow-y-auto border border-slate-300 rounded-lg bg-white dark:border-slate-600 dark:bg-slate-800">
+                                    <div v-for="project in projects" :key="project.id" class="flex items-center p-2 hover:bg-slate-50 dark:hover:bg-slate-700">
+                                        <input
+                                            :id="`filter-project-${project.id}`"
+                                            type="checkbox"
+                                            :value="project.id"
+                                            :checked="localFilters.project_ids.includes(project.id)"
+                                            @change="toggleProject(project.id)"
+                                            class="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700"
+                                        />
+                                        <label :for="`filter-project-${project.id}`" class="ml-2 text-sm text-slate-900 dark:text-slate-50 cursor-pointer">
+                                            {{ project.name }}
+                                        </label>
+                                    </div>
+                                    <div v-if="!projects.length" class="p-2 text-sm text-slate-500 dark:text-slate-400">
+                                        No projects available
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="flex flex-col">
@@ -150,21 +157,26 @@ watch(
                             <div class="flex flex-col">
                                 <label class="mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
                                     <i class="fa-solid fa-info-circle mr-1 text-slate-600 dark:text-slate-400"></i>
-                                    Situation
+                                    Situations
                                 </label>
-                                <select
-                                    v-model="localFilters.status_id"
-                                    class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50"
-                                >
-                                    <option :value="null">All situations</option>
-                                    <option
-                                        v-for="status in statuses"
-                                        :key="status.id"
-                                        :value="status.id"
-                                    >
-                                        {{ status.name }}
-                                    </option>
-                                </select>
+                                <div class="max-h-32 overflow-y-auto border border-slate-300 rounded-lg bg-white dark:border-slate-600 dark:bg-slate-800">
+                                    <div v-for="status in statuses" :key="status.id" class="flex items-center p-2 hover:bg-slate-50 dark:hover:bg-slate-700">
+                                        <input
+                                            :id="`filter-status-${status.id}`"
+                                            type="checkbox"
+                                            :value="status.id"
+                                            :checked="localFilters.status_ids.includes(status.id)"
+                                            @change="toggleStatus(status.id)"
+                                            class="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700"
+                                        />
+                                        <label :for="`filter-status-${status.id}`" class="ml-2 text-sm text-slate-900 dark:text-slate-50 cursor-pointer">
+                                            {{ status.name }}
+                                        </label>
+                                    </div>
+                                    <div v-if="!statuses.length" class="p-2 text-sm text-slate-500 dark:text-slate-400">
+                                        No situations available
+                                    </div>
+                                </div>
                             </div>
 
 

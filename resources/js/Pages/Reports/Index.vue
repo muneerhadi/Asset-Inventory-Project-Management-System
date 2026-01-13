@@ -7,11 +7,22 @@ const props = defineProps({
     projects: Array,
 });
 
-const selectedProjectId = ref(props.projects[0]?.id ?? null);
+const selectedProjectIds = ref([]);
 
 const openProjectReport = () => {
-    if (!selectedProjectId.value) return;
-    router.get(route('reports.project', selectedProjectId.value));
+    if (selectedProjectIds.value.length === 0) return;
+    // For now, open the first selected project (single project report)
+    // TODO: Update backend to support multiple projects
+    router.get(route('reports.project', selectedProjectIds.value[0]));
+};
+
+const toggleProject = (projectId) => {
+    const index = selectedProjectIds.value.indexOf(projectId);
+    if (index > -1) {
+        selectedProjectIds.value.splice(index, 1);
+    } else {
+        selectedProjectIds.value.push(projectId);
+    }
 };
 </script>
 
@@ -63,24 +74,29 @@ const openProjectReport = () => {
                             Generate printable inventory for a single project, including all items.
                         </p>
                         <div class="mt-3">
-                            <select
-                                v-model="selectedProjectId"
-                                class="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 shadow-sm transition focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-50 dark:focus:border-pink-400"
-                            >
-                                <option :value="null">Select project</option>
-                                <option
-                                    v-for="project in projects"
-                                    :key="project.id"
-                                    :value="project.id"
-                                >
-                                    {{ project.code }} - {{ project.name }}
-                                </option>
-                            </select>
+                            <label class="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                Select Projects
+                            </label>
+                            <div class="max-h-32 overflow-y-auto border border-slate-200 rounded-lg dark:border-slate-700">
+                                <div v-for="project in projects" :key="project.id" class="flex items-center p-2 hover:bg-slate-50 dark:hover:bg-slate-800">
+                                    <input
+                                        :id="`project-${project.id}`"
+                                        type="checkbox"
+                                        :value="project.id"
+                                        :checked="selectedProjectIds.includes(project.id)"
+                                        @change="toggleProject(project.id)"
+                                        class="h-3 w-3 text-purple-600 border-slate-300 rounded focus:ring-purple-500 dark:border-slate-600 dark:bg-slate-700"
+                                    />
+                                    <label :for="`project-${project.id}`" class="ml-2 text-xs text-slate-900 dark:text-slate-50 cursor-pointer">
+                                        {{ project.name }}
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                         <button
                             type="button"
                             class="mt-3 inline-flex items-center gap-2 rounded-lg bg-purple-100 px-3 py-2 text-xs font-medium text-purple-700 transition hover:bg-purple-200 disabled:opacity-50 dark:bg-purple-900/40 dark:text-purple-300 dark:hover:bg-purple-900/60"
-                            :disabled="!selectedProjectId"
+                            :disabled="selectedProjectIds.length === 0"
                             @click="openProjectReport"
                         >
                             <i class="fa-solid fa-arrow-right text-xs"></i>

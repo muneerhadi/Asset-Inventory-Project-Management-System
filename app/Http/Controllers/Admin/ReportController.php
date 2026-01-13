@@ -111,8 +111,8 @@ class ReportController extends Controller
         $user = $request->user();
 
         $filters = [
-            'project_id' => $request->integer('project_id') ?: null,
-            'status_id' => $request->integer('status_id') ?: null,
+            'project_ids' => $request->input('project_ids', []),
+            'status_ids' => $request->input('status_ids', []),
             'assignment_status' => $request->input('assignment_status'),
             'from' => $request->input('from'),
             'to' => $request->input('to'),
@@ -127,12 +127,12 @@ class ReportController extends Controller
             $itemsQuery->whereIn('project_id', $projectIds);
         }
 
-        if ($filters['project_id']) {
-            $itemsQuery->where('project_id', $filters['project_id']);
+        if (!empty($filters['project_ids'])) {
+            $itemsQuery->whereIn('project_id', $filters['project_ids']);
         }
 
-        if ($filters['status_id']) {
-            $itemsQuery->where('item_status_id', $filters['status_id']);
+        if (!empty($filters['status_ids'])) {
+            $itemsQuery->whereIn('item_status_id', $filters['status_ids']);
         }
 
         if ($filters['from']) {

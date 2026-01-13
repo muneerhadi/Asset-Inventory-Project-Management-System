@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 const props = defineProps({
     employees: Object,
@@ -17,8 +17,18 @@ const showAssignModal = ref(false);
 const showDeleteModal = ref(false);
 const employeeToDelete = ref(null);
 
-const submitSearch = () => {
-    router.get(route('employees.index'), { search: search.value }, { preserveState: true, replace: true });
+// Live search functionality
+watch(search, (newValue) => {
+    router.get(
+        route('employees.index'),
+        { search: newValue || undefined },
+        { preserveState: true, replace: true },
+    );
+}, { debounce: 300 });
+
+const clearSearch = () => {
+    search.value = '';
+    router.get(route('employees.index'), {}, { preserveState: true, replace: true });
 };
 
 const openAssignModal = (employeeId) => {
@@ -98,24 +108,23 @@ const cancelDelete = () => {
             <div class="mx-auto max-w-7xl space-y-4 sm:px-6 lg:px-8">
 
                 <div class="rounded-xl border border-slate-200/50 bg-white/70 p-4 shadow-md dark:border-slate-700/50 dark:bg-slate-900/70 dark:backdrop-blur">
-                    <div class="flex items-center justify-between gap-4">
-                        <div class="flex-1">
+                    <div class="flex items-center gap-2">
+                        <div class="flex-1 relative">
                             <input
                                 v-model="search"
                                 type="text"
-                                placeholder="Search by ID, name, location, position..."
-                                class="block w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 placeholder-slate-500 transition focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-50 dark:placeholder-slate-400 dark:focus:border-pink-400"
-                                @keyup.enter="submitSearch"
+                                placeholder="Search by name, position, location, email..."
+                                class="block w-full rounded-lg border border-slate-200 bg-white px-4 py-2 pr-10 text-sm text-slate-900 placeholder-slate-500 transition focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-50 dark:placeholder-slate-400 dark:focus:border-pink-400"
                             />
+                            <button
+                                v-if="search"
+                                type="button"
+                                @click="clearSearch"
+                                class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
+                            >
+                                <i class="fa-solid fa-times"></i>
+                            </button>
                         </div>
-                        <button
-                            type="button"
-                            class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-sky-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-blue-700 dark:to-sky-700"
-                            @click="submitSearch"
-                        >
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                            <span>Search</span>
-                        </button>
                     </div>
                 </div>
 
