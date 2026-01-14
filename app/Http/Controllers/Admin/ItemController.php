@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Activity;
 use App\Models\Currency;
+use App\Models\Employee;
 use App\Models\Item;
 use App\Models\ItemCategory;
+use App\Models\ItemEmployeeAssignment;
 use App\Models\ItemStatus;
 use App\Models\Project;
 use App\Rules\UniqueTagSequentialNumber;
@@ -383,8 +385,17 @@ class ItemController extends Controller
             $created = 0;
             $errors = [];
             $duplicates = [];
+            $missingEmployees = [];
+            $existingTagNumbers = Item::pluck('tag_number')->toArray();
+            $rowNumber = 1;
 
             while (($row = fgetcsv($handle)) !== false) {
+                $rowNumber++;
+                
+                // Skip empty rows
+                if (empty(array_filter($row))) {
+                    continue;
+                }
                 $get = function (string $key) use ($map, $row) {
                     $key = strtolower($key);
                     if (!array_key_exists($key, $map)) {
@@ -393,28 +404,45 @@ class ItemController extends Controller
                     return trim($row[$map[$key]] ?? '') ?: null;
                 };
 
-                $tagNumber = $get('tag_number');
-                $name = $get('name');
+                $tagNumber = $get('asset tag no');
+                $name = $get('item name');
 
+                // Skip if tag number or name is empty
                 if (!$tagNumber || !$name) {
+                    $errors[] = "Row {$rowNumber}: Missing tag number or item name";
                     continue;
                 }
 
-                // Check for duplicate tag number
-                if (Item::where('tag_number', $tagNumber)->exists()) {
-                    $duplicates[] = $tagNumber;
-                    continue;
+                // Extract last 5 digits from tag number
+                $lastDigits = '';
+                if (preg_match('/(\d+)$/', $tagNumber, $matches)) {
+                    $lastDigits = $matches[1];
+                    
+                    // Check if any existing tag number ends with same digits
+                    $isDuplicate = false;
+                    foreach ($existingTagNumbers as $existingTag) {
+                        if (preg_match('/(\d+)$/', $existingTag, $existingMatches)) {
+                            if ($existingMatches[1] === $lastDigits) {
+                                $isDuplicate = true;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if ($isDuplicate) {
+                        $duplicates[] = $tagNumber . ' (last digits: ' . $lastDigits . ')';
+                        continue;
+                    }
                 }
 
                 try {
                     $categoryName = $get('category');
                     $statusName = $get('status');
-                    $currencyCode = $get('currency');
-                    $projectName = $get('project');
+                    $projectName = $get('poject') ?: $get('project');
+                    $empName = $get('emp-name');
 
                     $category = $categoryName ? ItemCategory::firstOrCreate(['name' => $categoryName]) : ItemCategory::first();
                     $status = $statusName ? ItemStatus::where('name', $statusName)->first() : ItemStatus::where('is_default', true)->first();
-                    $currency = $currencyCode ? Currency::where('code', $currencyCode)->first() : null;
                     $project = $projectName ? Project::where('name', $projectName)->first() : null;
 
                     if (!$category) {
@@ -424,26 +452,56 @@ class ItemController extends Controller
                         $status = ItemStatus::create(['name' => 'Active', 'slug' => 'active', 'is_default' => true]);
                     }
 
-                    Item::create([
-                        'item_code' => $tagNumber,
+                    // Auto-generate item code
+                    $lastItem = Item::orderBy('id', 'desc')->first();
+                    $nextNumber = $lastItem ? $lastItem->id + 1 : 1;
+                    $itemCode = 'ITEM-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+                    
+                    while (Item::where('item_code', $itemCode)->exists()) {
+                        $nextNumber++;
+                        $itemCode = 'ITEM-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+                    }
+
+                    $item = Item::create([
+                        'item_code' => $itemCode,
                         'tag_number' => $tagNumber,
                         'name' => $name,
                         'description' => $get('description'),
                         'item_category_id' => $category->id,
                         'item_status_id' => $status->id,
-                        'price' => ($price = $get('price')) ? (float) $price : null,
-                        'currency_id' => $currency?->id,
-                        'purchase_date' => $get('purchase_date') ?: null,
+                        'price' => ($price = $get('price')) ? (float) str_replace(',', '', $price) : null,
+                        'purchase_date' => $get('date') ?: null,
+                        'voucher_number' => $get('voucher number'),
                         'location' => $get('location'),
+                        'sublocation' => $get('sublocation'),
                         'model' => $get('model'),
-                        'serial_number' => $get('serial_number'),
+                        'serial_number' => $get('serial number'),
                         'project_id' => $project?->id,
                         'remarks' => $get('remarks') ?: 'Imported from Excel',
                     ]);
 
+                    // Add to existing tags to check for duplicates in same import
+                    $existingTagNumbers[] = $tagNumber;
+
+                    // Handle employee assignment
+                    if ($empName) {
+                        $employee = Employee::where('name', $empName)->first();
+                        if ($employee) {
+                            ItemEmployeeAssignment::create([
+                                'item_id' => $item->id,
+                                'employee_id' => $employee->id,
+                                'project_id' => $project?->id,
+                            ]);
+                        } else {
+                            if (!in_array($empName, $missingEmployees)) {
+                                $missingEmployees[] = $empName;
+                            }
+                        }
+                    }
+
                     $created++;
                 } catch (\Exception $e) {
-                    $errors[] = "Row with tag {$tagNumber}: " . $e->getMessage();
+                    $errors[] = "Row {$rowNumber} (Tag: {$tagNumber}): " . $e->getMessage();
                 }
             }
 
@@ -459,10 +517,17 @@ class ItemController extends Controller
 
             $message = $created . ' items imported successfully.';
             if (!empty($duplicates)) {
-                $message .= ' Skipped ' . count($duplicates) . ' duplicate tag numbers: ' . implode(', ', array_slice($duplicates, 0, 5));
-                if (count($duplicates) > 5) {
-                    $message .= ' and ' . (count($duplicates) - 5) . ' more.';
+                $message .= ' Skipped ' . count($duplicates) . ' items with duplicate tag numbers: ' . implode(', ', array_slice($duplicates, 0, 3));
+                if (count($duplicates) > 3) {
+                    $message .= ' and ' . (count($duplicates) - 3) . ' more.';
                 }
+            }
+            if (!empty($missingEmployees)) {
+                $message .= ' Warning: These employees are not in the system: ' . implode(', ', array_slice($missingEmployees, 0, 3));
+                if (count($missingEmployees) > 3) {
+                    $message .= ' and ' . (count($missingEmployees) - 3) . ' more.';
+                }
+                $message .= ' Please add them first.';
             }
             if (!empty($errors)) {
                 $message .= ' ' . count($errors) . ' items had errors and were skipped.';

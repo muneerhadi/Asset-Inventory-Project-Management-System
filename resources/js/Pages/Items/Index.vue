@@ -423,12 +423,12 @@ const importItems = () => {
                         <p class="text-sm text-blue-700 dark:text-blue-300 mb-2">
                             Your Excel file should have the following columns:
                         </p>
-                        <div class="text-xs text-blue-600 dark:text-blue-400 font-mono bg-blue-100 dark:bg-blue-900/30 p-2 rounded">
-                            tag_number | name | description | category | status | price | currency | purchase_date | location | model | serial_number | project | remarks
+                        <div class="text-xs text-blue-600 dark:text-blue-400 font-mono bg-blue-100 dark:bg-blue-900/30 p-2 rounded overflow-x-auto">
+                            Asset Tag NO | Category | Poject | Voucher Number | Item Name | description | Model | Serial Number | Price | Date | Location | Sublocation | EMP-Name | Status | Remarks
                         </div>
                         <p class="text-xs text-blue-600 dark:text-blue-400 mt-2">
-                            <strong>Required:</strong> tag_number, name<br>
-                            <strong>Note:</strong> Duplicate tag numbers will be rejected
+                            <strong>Required:</strong> Asset Tag NO, Item Name<br>
+                            <strong>Note:</strong> Tag numbers must end with unique digits (last 5 digits checked). If EMP-Name is provided, employee must exist in system.
                         </p>
                     </div>
                 </div>
