@@ -440,6 +440,18 @@ class ItemController extends Controller
                     $statusName = $get('status');
                     $projectName = $get('poject') ?: $get('project');
                     $empName = $get('emp-name');
+                    $dateValue = $get('date');
+
+                    // Parse date in various formats
+                    $purchaseDate = null;
+                    if ($dateValue) {
+                        try {
+                            $purchaseDate = \Carbon\Carbon::parse($dateValue)->format('Y-m-d');
+                        } catch (\Exception $e) {
+                            // If date parsing fails, leave it null
+                            $purchaseDate = null;
+                        }
+                    }
 
                     $category = $categoryName ? ItemCategory::firstOrCreate(['name' => $categoryName]) : ItemCategory::first();
                     $status = $statusName ? ItemStatus::where('name', $statusName)->first() : ItemStatus::where('is_default', true)->first();
@@ -470,7 +482,7 @@ class ItemController extends Controller
                         'item_category_id' => $category->id,
                         'item_status_id' => $status->id,
                         'price' => ($price = $get('price')) ? (float) str_replace(',', '', $price) : null,
-                        'purchase_date' => $get('date') ?: null,
+                        'purchase_date' => $purchaseDate,
                         'voucher_number' => $get('voucher number'),
                         'location' => $get('location'),
                         'sublocation' => $get('sublocation'),
