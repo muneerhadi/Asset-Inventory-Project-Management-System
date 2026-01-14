@@ -377,6 +377,9 @@ class ItemController extends Controller
                 return redirect()->back()->with('error', 'File is empty or invalid.');
             }
 
+            // Log header for debugging
+            \Log::info('Import Headers:', $header);
+
             $map = [];
             foreach ($header as $index => $column) {
                 $map[strtolower(trim($column))] = $index;
@@ -406,6 +409,8 @@ class ItemController extends Controller
 
                 $tagNumber = $get('asset tag no');
                 $name = $get('item name');
+
+                \Log::info('Processing row ' . $rowNumber, ['tag' => $tagNumber, 'name' => $name]);
 
                 // Skip if tag number or name is empty
                 if (!$tagNumber || !$name) {
@@ -528,6 +533,14 @@ class ItemController extends Controller
             ]);
 
             $message = $created . ' items imported successfully.';
+            
+            \Log::info('Import completed', [
+                'created' => $created,
+                'duplicates' => count($duplicates),
+                'errors' => count($errors),
+                'missing_employees' => count($missingEmployees)
+            ]);
+            
             if (!empty($duplicates)) {
                 $message .= ' Skipped ' . count($duplicates) . ' items with duplicate tag numbers: ' . implode(', ', array_slice($duplicates, 0, 3));
                 if (count($duplicates) > 3) {
