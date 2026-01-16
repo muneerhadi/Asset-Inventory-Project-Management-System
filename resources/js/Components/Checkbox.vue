@@ -8,7 +8,7 @@ const props = defineProps({
         type: [Array, Boolean],
         required: true,
     },
-    value: {
+    value: { 
         default: null,
     },
 });
