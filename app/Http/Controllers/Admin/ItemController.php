@@ -636,4 +636,25 @@ class ItemController extends Controller
             'items' => $items,
         ]);
     }
+
+    public function bulkDelete(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'item_ids' => ['required', 'array'],
+            'item_ids.*' => ['exists:items,id'],
+        ]);
+
+        $count = Item::whereIn('id', $validated['item_ids'])->count();
+        Item::whereIn('id', $validated['item_ids'])->delete();
+
+        Activity::create([
+            'user_id' => $request->user()->id,
+            'action' => 'items_bulk_deleted',
+            'description' => $count . ' items deleted in bulk',
+            'subject_type' => Item::class,
+            'subject_id' => null,
+        ]);
+
+        return redirect()->route('items.index')->with('success', $count . ' items deleted successfully.');
+    }
 }

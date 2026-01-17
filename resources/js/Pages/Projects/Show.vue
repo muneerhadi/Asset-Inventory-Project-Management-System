@@ -18,12 +18,30 @@ const showFinalConfirmModal = ref(false);
 const adminPassword = ref('');
 const passwordError = ref('');
 const isVerifyingPassword = ref(false);
+const showItemDeleteModal = ref(false);
+const itemToDelete = ref(null);
 
-const removeItem = (id) => {
-    router.delete(route('projects.detach-item', props.project.id), {
-        data: { item_id: id },
-        preserveScroll: true,
-    });
+const removeItem = (item) => {
+    itemToDelete.value = item;
+    showItemDeleteModal.value = true;
+};
+
+const confirmItemDelete = () => {
+    if (itemToDelete.value) {
+        router.delete(route('projects.detach-item', props.project.id), {
+            data: { item_id: itemToDelete.value.id },
+            preserveScroll: true,
+            onSuccess: () => {
+                showItemDeleteModal.value = false;
+                itemToDelete.value = null;
+            }
+        });
+    }
+};
+
+const cancelItemDelete = () => {
+    showItemDeleteModal.value = false;
+    itemToDelete.value = null;
 };
 
 const deleteProject = () => {
@@ -327,7 +345,7 @@ const importItems = () => {
                                         <button
                                             type="button"
                                             class="inline-flex items-center rounded-lg bg-rose-100 px-3 py-1 text-xs font-medium text-rose-700 transition hover:bg-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:hover:bg-rose-900/50"
-                                            @click="removeItem(item.id)"
+                                            @click="removeItem(item)"
                                         >
                                             <i class="fa-solid fa-trash text-xs"></i>
                                             <span>Delete</span>
@@ -492,6 +510,46 @@ const importItems = () => {
                     >
                         <i class="fa-solid fa-trash"></i>
                         Delete Project Forever
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Item Delete Confirmation Modal -->
+        <div v-if="showItemDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 dark:bg-black/70">
+            <div class="w-full max-w-md space-y-4 rounded-xl bg-white shadow-xl dark:bg-slate-900">
+                <div class="border-b border-slate-200 bg-gradient-to-r from-red-50 to-rose-50 px-6 py-4 dark:border-slate-700 dark:from-red-950/50 dark:to-rose-950/50">
+                    <h3 class="text-lg font-semibold text-red-900 dark:text-red-100">
+                        <i class="fa-solid fa-triangle-exclamation mr-2 text-red-600 dark:text-red-400"></i>
+                        Remove Item from Project
+                    </h3>
+                </div>
+                <div class="px-6 py-4">
+                    <p class="text-sm text-slate-700 dark:text-slate-300 mb-4">
+                        Are you sure you want to remove this item from the project? The item will be unassigned but not deleted.
+                    </p>
+                    <div v-if="itemToDelete" class="bg-slate-50 dark:bg-slate-800 rounded-lg p-3">
+                        <p class="font-medium text-slate-900 dark:text-slate-50">{{ itemToDelete.name }}</p>
+                        <p class="text-sm text-slate-600 dark:text-slate-400">Tag: {{ itemToDelete.tag_number || 'N/A' }}</p>
+                        <p class="text-sm text-slate-600 dark:text-slate-400">Status: {{ itemToDelete.status?.name || 'N/A' }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-end gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-700 dark:bg-slate-800/50">
+                    <button
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+                        @click="cancelItemDelete"
+                    >
+                        <i class="fa-solid fa-xmark"></i>
+                        Cancel
+                    </button>
+                    <button
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 px-6 py-2.5 text-sm font-medium text-white shadow-md transition hover:shadow-lg"
+                        @click="confirmItemDelete"
+                    >
+                        <i class="fa-solid fa-unlink"></i>
+                        Remove Item
                     </button>
                 </div>
             </div>

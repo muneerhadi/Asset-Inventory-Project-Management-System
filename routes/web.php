@@ -21,6 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:super_admin,project_manager')->group(function () {
         Route::resource('items', ItemController::class);
         Route::post('items/import', [ItemController::class, 'import'])->name('items.import');
+        Route::post('items/bulk-delete', [ItemController::class, 'bulkDelete'])->name('items.bulk-delete');
         Route::get('items-in-stock', [ItemController::class, 'inStock'])->name('items.in-stock');
         Route::resource('employees', EmployeeController::class);
         Route::post('employees/import', [EmployeeController::class, 'import'])->name('employees.import');

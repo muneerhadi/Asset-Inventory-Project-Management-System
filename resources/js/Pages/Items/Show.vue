@@ -241,6 +241,10 @@ onUnmounted(() => {
                                     <dt class="text-xs font-medium uppercase tracking-wide text-slate-600 dark:text-slate-400">Serial Number</dt>
                                     <dd class="mt-1.5 text-sm text-slate-700 dark:text-slate-300">{{ item.serial_number ?? '-' }}</dd>
                                 </div>
+                                <div>
+                                    <dt class="text-xs font-medium uppercase tracking-wide text-slate-600 dark:text-slate-400">Description</dt>
+                                    <dd class="mt-1.5 text-sm text-slate-700 dark:text-slate-300">{{ item.description ?? '-' }}</dd>
+                                </div>
                             </dl>
                         </div>
 

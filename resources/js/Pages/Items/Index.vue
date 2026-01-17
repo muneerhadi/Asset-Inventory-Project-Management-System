@@ -14,6 +14,8 @@ const search = ref(props.filters?.search ?? '');
 const activeStatus = ref(props.filters?.status ?? '');
 const showDeleteModal = ref(false);
 const itemToDelete = ref(null);
+const selectedItems = ref([]);
+const showBulkDeleteModal = ref(false);
 const showImportModal = ref(false);
 const importFile = ref(null);
 const isImporting = ref(false);
@@ -70,6 +72,45 @@ const confirmDelete = () => {
 const cancelDelete = () => {
     showDeleteModal.value = false;
     itemToDelete.value = null;
+};
+
+const toggleItemSelection = (itemId) => {
+    const index = selectedItems.value.indexOf(itemId);
+    if (index > -1) {
+        selectedItems.value.splice(index, 1);
+    } else {
+        selectedItems.value.push(itemId);
+    }
+};
+
+const selectAllItems = () => {
+    if (selectedItems.value.length === items.data.length) {
+        selectedItems.value = [];
+    } else {
+        selectedItems.value = items.data.map(item => item.id);
+    }
+};
+
+const bulkDelete = () => {
+    if (selectedItems.value.length > 0) {
+        showBulkDeleteModal.value = true;
+    }
+};
+
+const confirmBulkDelete = () => {
+    router.post(route('items.bulk-delete'), {
+        item_ids: selectedItems.value
+    }, {
+        preserveScroll: true,
+        onSuccess: () => {
+            showBulkDeleteModal.value = false;
+            selectedItems.value = [];
+        }
+    });
+};
+
+const cancelBulkDelete = () => {
+    showBulkDeleteModal.value = false;
 };
 
 const openImportModal = () => {
@@ -258,6 +299,15 @@ const importItems = () => {
 
                 <div class="rounded-xl border border-slate-200/50 bg-white/70 p-4 shadow-md dark:border-slate-700/50 dark:bg-slate-900/70 dark:backdrop-blur">
                     <div class="flex items-center gap-2">
+                        <button
+                            v-if="selectedItems.length > 0"
+                            type="button"
+                            @click="bulkDelete"
+                            class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:shadow-lg"
+                        >
+                            <i class="fa-solid fa-trash"></i>
+                            <span>Delete Selected ({{ selectedItems.length }})</span>
+                        </button>
                         <div class="flex-1 relative">
                             <input
                                 v-model="search"
@@ -282,6 +332,14 @@ const importItems = () => {
                         <table class="w-full text-sm">
                             <thead>
                                 <tr class="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100 dark:border-slate-700 dark:from-slate-900 dark:to-slate-800">
+                                    <th class="px-4 py-3 text-left">
+                                        <input
+                                            type="checkbox"
+                                            :checked="selectedItems.length === items.data.length && items.data.length > 0"
+                                            @change="selectAllItems"
+                                            class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700"
+                                        />
+                                    </th>
                                     <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">#</th>
                                     <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Name</th>
                                     <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Model</th>
@@ -300,6 +358,14 @@ const importItems = () => {
                                     :key="item.id"
                                     class="bg-white transition hover:bg-slate-50 dark:bg-slate-900/50 dark:hover:bg-slate-800/50"
                                 >
+                                    <td class="px-4 py-3">
+                                        <input
+                                            type="checkbox"
+                                            :checked="selectedItems.includes(item.id)"
+                                            @change="toggleItemSelection(item.id)"
+                                            class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700"
+                                        />
+                                    </td>
                                     <td class="px-4 py-3 text-slate-700 dark:text-slate-300">{{ (items.current_page - 1) * items.per_page + index + 1 }}</td>
                                     <td class="px-4 py-3 font-medium text-slate-900 dark:text-slate-50">{{ item.name }}</td>
                                     <td class="px-4 py-3 text-slate-700 dark:text-slate-300">{{ item.model || '-' }}</td>
