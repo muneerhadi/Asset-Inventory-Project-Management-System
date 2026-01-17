@@ -25,6 +25,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('items-in-stock', [ItemController::class, 'inStock'])->name('items.in-stock');
         Route::resource('employees', EmployeeController::class);
         Route::post('employees/import', [EmployeeController::class, 'import'])->name('employees.import');
+        Route::post('employees/bulk-delete', [EmployeeController::class, 'bulkDelete'])->name('employees.bulk-delete');
         Route::post('employees/{employee}/assign-item', [EmployeeController::class, 'assignItem'])
             ->name('employees.assign-item');
         Route::delete('employees/{employee}/unassign-item/{assignment}', [EmployeeController::class, 'unassignItem'])

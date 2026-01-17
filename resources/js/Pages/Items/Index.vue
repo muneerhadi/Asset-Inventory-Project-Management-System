@@ -568,5 +568,40 @@ const importItems = () => {
                 </div>
             </div>
         </div>
+
+        <!-- Bulk Delete Confirmation Modal -->
+        <div v-if="showBulkDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 dark:bg-black/70">
+            <div class="w-full max-w-md space-y-4 rounded-xl bg-white shadow-xl dark:bg-slate-900">
+                <div class="border-b border-slate-200 bg-gradient-to-r from-red-50 to-rose-50 px-6 py-4 dark:border-slate-700 dark:from-red-950/50 dark:to-rose-950/50">
+                    <h3 class="text-lg font-semibold text-red-900 dark:text-red-100">
+                        <i class="fa-solid fa-triangle-exclamation mr-2 text-red-600 dark:text-red-400"></i>
+                        Delete Multiple Items
+                    </h3>
+                </div>
+                <div class="px-6 py-4">
+                    <p class="text-sm text-slate-700 dark:text-slate-300 mb-4">
+                        Are you sure you want to delete {{ selectedItems.length }} selected items? This action cannot be undone.
+                    </p>
+                </div>
+                <div class="flex items-center justify-end gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-700 dark:bg-slate-800/50">
+                    <button
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+                        @click="cancelBulkDelete"
+                    >
+                        <i class="fa-solid fa-xmark"></i>
+                        Cancel
+                    </button>
+                    <button
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 px-6 py-2.5 text-sm font-medium text-white shadow-md transition hover:shadow-lg"
+                        @click="confirmBulkDelete"
+                    >
+                        <i class="fa-solid fa-trash"></i>
+                        Delete Items
+                    </button>
+                </div>
+            </div>
+        </div>
     </AuthenticatedLayout>
 </template>

@@ -19,6 +19,8 @@ const employeeToDelete = ref(null);
 const showImportModal = ref(false);
 const importFile = ref(null);
 const isImporting = ref(false);
+const selectedEmployees = ref([]);
+const showBulkDeleteModal = ref(false);
 
 // Live search functionality
 watch(search, (newValue) => {
@@ -112,6 +114,45 @@ const importEmployees = () => {
             isImporting.value = false;
         }
     });
+};
+
+const toggleEmployeeSelection = (employeeId) => {
+    const index = selectedEmployees.value.indexOf(employeeId);
+    if (index > -1) {
+        selectedEmployees.value.splice(index, 1);
+    } else {
+        selectedEmployees.value.push(employeeId);
+    }
+};
+
+const selectAllEmployees = () => {
+    if (selectedEmployees.value.length === employees.data.length) {
+        selectedEmployees.value = [];
+    } else {
+        selectedEmployees.value = employees.data.map(emp => emp.id);
+    }
+};
+
+const bulkDeleteEmployees = () => {
+    if (selectedEmployees.value.length > 0) {
+        showBulkDeleteModal.value = true;
+    }
+};
+
+const confirmBulkDelete = () => {
+    router.post(route('employees.bulk-delete'), {
+        employee_ids: selectedEmployees.value
+    }, {
+        preserveScroll: true,
+        onSuccess: () => {
+            showBulkDeleteModal.value = false;
+            selectedEmployees.value = [];
+        }
+    });
+};
+
+const cancelBulkDelete = () => {
+    showBulkDeleteModal.value = false;
 };
 </script>
 

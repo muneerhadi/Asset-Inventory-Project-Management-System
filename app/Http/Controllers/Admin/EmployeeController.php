@@ -383,4 +383,32 @@ class EmployeeController extends Controller
             return redirect()->back()->with('error', 'Error processing file: ' . $e->getMessage());
         }
     }
+
+    public function bulkDelete(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        // Only super admins can delete employees
+        if (! $user->isSuperAdmin()) {
+            abort(403, 'Only super administrators can delete employees.');
+        }
+
+        $validated = $request->validate([
+            'employee_ids' => ['required', 'array'],
+            'employee_ids.*' => ['exists:employees,id'],
+        ]);
+
+        $count = Employee::whereIn('id', $validated['employee_ids'])->count();
+        Employee::whereIn('id', $validated['employee_ids'])->delete();
+
+        Activity::create([
+            'user_id' => $user->id,
+            'action' => 'employees_bulk_deleted',
+            'description' => $count . ' employees deleted in bulk',
+            'subject_type' => Employee::class,
+            'subject_id' => null,
+        ]);
+
+        return redirect()->route('employees.index')->with('success', $count . ' employees deleted successfully.');
+    }
 }
