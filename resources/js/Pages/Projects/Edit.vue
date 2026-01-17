@@ -106,23 +106,7 @@ const cancelPasswordModal = () => {
             <div class="mx-auto max-w-4xl space-y-6 sm:px-6 lg:px-8">
                 <div class="overflow-hidden rounded-xl border border-slate-200/50 bg-gradient-to-br from-white to-slate-50/50 p-6 shadow-md dark:border-slate-700/50 dark:from-slate-900 dark:to-slate-800/50">
                     <form @submit.prevent="submit" class="space-y-6">
-                        <div class="grid gap-6 md:grid-cols-2">
-                            <div>
-                                <label class="block text-sm font-semibold text-slate-900 dark:text-slate-50">
-                                    <i class="fa-solid fa-code mr-2 text-sky-600 dark:text-sky-400"></i>
-                                    Project ID / Code
-                                </label>
-                                <input
-                                    v-model="form.code"
-                                    type="text"
-                                    class="mt-2 block w-full rounded-lg border-2 border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 transition-all focus:border-sky-500 focus:outline-none focus:ring-4 focus:ring-sky-500/20 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50 dark:focus:border-sky-400"
-                                    required
-                                />
-                                <p v-if="form.errors.code" class="mt-2 text-xs text-rose-600 dark:text-rose-400">
-                                    <i class="fa-solid fa-circle-exclamation mr-1"></i>
-                                    {{ form.errors.code }}
-                                </p>
-                            </div>
+                        <div class="grid gap-6 md:grid-cols-1">
                             <div>
                                 <label class="block text-sm font-semibold text-slate-900 dark:text-slate-50">
                                     <i class="fa-solid fa-heading mr-2 text-sky-600 dark:text-sky-400"></i>
@@ -250,20 +234,20 @@ const cancelPasswordModal = () => {
                 <div class="border-b border-slate-200 bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-4 dark:border-slate-700 dark:from-amber-950/50 dark:to-orange-950/50">
                     <h3 class="text-lg font-semibold text-amber-900 dark:text-amber-100">
                         <i class="fa-solid fa-lock mr-2 text-amber-600 dark:text-amber-400"></i>
-                        Admin Password Required
+                        Password Required
                     </h3>
                 </div>
                 <div class="px-6 py-4">
                     <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 dark:bg-amber-950/20 dark:border-amber-800">
                         <p class="text-sm text-amber-800 dark:text-amber-200">
                             <i class="fa-solid fa-info-circle mr-1"></i>
-                            Project editing requires admin password verification for security.
+                            Project editing requires password verification for security.
                         </p>
                     </div>
                     <div class="space-y-3">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                Admin Password *
+                                Your Password *
                             </label>
                             <input
                                 v-model="adminPassword"

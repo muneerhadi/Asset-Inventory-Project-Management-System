@@ -91,7 +91,6 @@ const toggleAllProjects = () => {
                                         id="select-all-projects-report"
                                         type="checkbox"
                                         :checked="selectedProjectIds.length === projects.length && projects.length > 0"
-                                        :indeterminate="selectedProjectIds.length > 0 && selectedProjectIds.length < projects.length"
                                         @change="toggleAllProjects"
                                         class="h-3 w-3 text-purple-600 border-slate-300 rounded focus:ring-purple-500 dark:border-slate-600 dark:bg-slate-700"
                                     />
@@ -103,7 +102,6 @@ const toggleAllProjects = () => {
                                     <input
                                         :id="`project-${project.id}`"
                                         type="checkbox"
-                                        :value="project.id"
                                         :checked="selectedProjectIds.includes(project.id)"
                                         @change="toggleProject(project.id)"
                                         class="h-3 w-3 text-purple-600 border-slate-300 rounded focus:ring-purple-500 dark:border-slate-600 dark:bg-slate-700"

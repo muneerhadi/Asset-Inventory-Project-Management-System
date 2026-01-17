@@ -1,16 +1,20 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { resolveImage } from '@/utils/imageResolver';
 
 const props = defineProps({
     employee: Object,
-    availableItems: Array,
+    availableItems: {
+        type: Array,
+        default: () => []
+    },
 });
 
 const selectedItemIds = ref([]);
 const showAssignModal = ref(false);
+const itemSearch = ref('');
 
 const showDeleteModal = ref(false);
 const showUnassignModal = ref(false);
@@ -64,11 +68,20 @@ const assignItem = () => {
             preserveScroll: true,
             onSuccess: () => {
                 selectedItemIds.value = [];
+                itemSearch.value = '';
                 showAssignModal.value = false;
             },
         },
     );
 };
+
+const filteredItems = computed(() => {
+    if (!props.availableItems || !Array.isArray(props.availableItems)) return [];
+    if (!itemSearch.value) return props.availableItems;
+    return props.availableItems.filter(item => 
+        item.tag_number?.toLowerCase().includes(itemSearch.value.toLowerCase())
+    );
+});
 </script>
 
 <template>
@@ -272,10 +285,21 @@ const assignItem = () => {
                 <div class="space-y-4 px-6 py-4">
                     <div>
                         <label class="block text-sm font-semibold text-slate-900 dark:text-slate-50 mb-2">
+                            Search Items by Tag Number
+                        </label>
+                        <input
+                            v-model="itemSearch"
+                            type="text"
+                            placeholder="Enter tag number to search..."
+                            class="block w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 placeholder-slate-500 transition focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-50 dark:placeholder-slate-400"
+                        />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-900 dark:text-slate-50 mb-2">
                             Select Items *
                         </label>
                         <div class="max-h-60 overflow-y-auto border border-slate-200 rounded-lg dark:border-slate-700">
-                            <div v-for="item in availableItems" :key="item.id" class="flex items-center p-3 hover:bg-slate-50 dark:hover:bg-slate-800">
+                            <div v-for="item in filteredItems" :key="item.id" class="flex items-center p-3 hover:bg-slate-50 dark:hover:bg-slate-800">
                                 <input
                                     :id="`item-${item.id}`"
                                     v-model="selectedItemIds"
@@ -292,8 +316,8 @@ const assignItem = () => {
                                     </div>
                                 </label>
                             </div>
-                            <div v-if="!availableItems.length" class="p-4 text-center text-slate-500 dark:text-slate-400">
-                                No available items to assign
+                            <div v-if="!filteredItems.length" class="p-4 text-center text-slate-500 dark:text-slate-400">
+                                {{ itemSearch ? 'No items found matching your search' : 'No available items to assign' }}
                             </div>
                         </div>
                         <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
@@ -306,7 +330,7 @@ const assignItem = () => {
                     <button
                         type="button"
                         class="inline-flex items-center gap-2 rounded-lg bg-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
-                        @click="showAssignModal = false; selectedItemIds = []"
+                        @click="showAssignModal = false; selectedItemIds = []; itemSearch = ''"
                     >
                         <i class="fa-solid fa-xmark"></i>
                         Cancel

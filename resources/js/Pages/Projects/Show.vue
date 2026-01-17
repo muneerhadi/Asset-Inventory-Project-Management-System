@@ -146,14 +146,6 @@ const importItems = () => {
                         <i class="fa-solid fa-download"></i>
                         Export CSV
                     </a>
-                    <button
-                        type="button"
-                        @click="showImportItems = !showImportItems"
-                        class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-purple-700 dark:to-pink-700"
-                    >
-                        <i class="fa-solid fa-file-import"></i>
-                        Import Excel
-                    </button>
                     <Link
                         :href="route('reports.project', project.id)"
                         class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-sky-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-blue-700 dark:to-sky-700"
@@ -424,17 +416,17 @@ const importItems = () => {
                 <div class="border-b border-slate-200 bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-4 dark:border-slate-700 dark:from-amber-950/50 dark:to-orange-950/50">
                     <h3 class="text-lg font-semibold text-amber-900 dark:text-amber-100">
                         <i class="fa-solid fa-lock mr-2 text-amber-600 dark:text-amber-400"></i>
-                        Admin Password Required
+                        Password Required
                     </h3>
                 </div>
                 <div class="px-6 py-4">
                     <p class="text-sm text-slate-700 dark:text-slate-300 mb-4">
-                        Enter your admin password to continue with project deletion:
+                        Enter your password to continue with project deletion:
                     </p>
                     <div class="space-y-3">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                Admin Password *
+                                Your Password *
                             </label>
                             <input
                                 v-model="adminPassword"

@@ -1,13 +1,16 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 
 const props = defineProps({
     employees: Object,
     stats: Object,
     filters: Object,
-    availableItems: Array,
+    availableItems: {
+        type: Array,
+        default: () => []
+    },
 });
 
 const search = ref(props.filters?.search ?? '');
@@ -22,6 +25,7 @@ const isImporting = ref(false);
 const selectedEmployees = ref([]);
 const showBulkDeleteModal = ref(false);
 const showCheckboxes = ref(false);
+const itemSearch = ref('');
 
 // Reset selections when hiding checkboxes
 watch(showCheckboxes, (newVal) => {
@@ -47,6 +51,7 @@ const clearSearch = () => {
 const openAssignModal = (employeeId) => {
     selectedEmployeeId.value = employeeId;
     selectedItemIds.value = [];
+    itemSearch.value = '';
     showAssignModal.value = true;
 };
 
@@ -54,6 +59,7 @@ const closeAssignModal = () => {
     showAssignModal.value = false;
     selectedEmployeeId.value = null;
     selectedItemIds.value = [];
+    itemSearch.value = '';
 };
 
 const assignItem = () => {
@@ -162,6 +168,14 @@ const confirmBulkDelete = () => {
 const cancelBulkDelete = () => {
     showBulkDeleteModal.value = false;
 };
+
+const filteredItems = computed(() => {
+    if (!props.availableItems || !Array.isArray(props.availableItems)) return [];
+    if (!itemSearch.value) return props.availableItems;
+    return props.availableItems.filter(item => 
+        item.tag_number?.toLowerCase().includes(itemSearch.value.toLowerCase())
+    );
+});
 </script>
 
 <template>
@@ -245,7 +259,7 @@ const cancelBulkDelete = () => {
                         <table class="w-full text-sm">
                             <thead>
                                 <tr class="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100 dark:border-slate-700 dark:from-slate-900 dark:to-slate-800">
-                                    <th v-if="showCheckboxes && $page.props.auth.user.role === 'super_admin'" class="px-4 py-3 text-left">
+                                    <th v-if="showCheckboxes && $page.props.auth.user.role === 'super_admin'" class="px-4 py-3 text-left cursor-pointer" @click="selectAllEmployees">
                                         <input
                                             type="checkbox"
                                             :checked="selectedEmployees.length === employees.data.length && employees.data.length > 0"
@@ -369,10 +383,21 @@ const cancelBulkDelete = () => {
                 <div class="space-y-4 px-6 py-4">
                     <div>
                         <label class="block text-sm font-semibold text-slate-900 dark:text-slate-50 mb-2">
+                            Search Items by Tag Number
+                        </label>
+                        <input
+                            v-model="itemSearch"
+                            type="text"
+                            placeholder="Enter tag number to search..."
+                            class="block w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 placeholder-slate-500 transition focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-50 dark:placeholder-slate-400"
+                        />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-900 dark:text-slate-50 mb-2">
                             Select Items *
                         </label>
                         <div class="max-h-60 overflow-y-auto border border-slate-200 rounded-lg dark:border-slate-700">
-                            <div v-for="item in availableItems" :key="item.id" class="flex items-center p-3 hover:bg-slate-50 dark:hover:bg-slate-800">
+                            <div v-for="item in filteredItems" :key="item.id" class="flex items-center p-3 hover:bg-slate-50 dark:hover:bg-slate-800">
                                 <input
                                     :id="`item-${item.id}`"
                                     v-model="selectedItemIds"
@@ -389,8 +414,8 @@ const cancelBulkDelete = () => {
                                     </div>
                                 </label>
                             </div>
-                            <div v-if="!availableItems.length" class="p-4 text-center text-slate-500 dark:text-slate-400">
-                                No available items to assign
+                            <div v-if="!filteredItems.length" class="p-4 text-center text-slate-500 dark:text-slate-400">
+                                {{ itemSearch ? 'No items found matching your search' : 'No available items to assign' }}
                             </div>
                         </div>
                         <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">

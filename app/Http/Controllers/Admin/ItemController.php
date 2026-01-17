@@ -520,6 +520,9 @@ class ItemController extends Controller
                         $itemCode = 'ITEM-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
                     }
 
+                    // Get default currency (Afghani)
+                    $defaultCurrency = Currency::where('code', 'AFN')->first() ?: Currency::first();
+
                     $item = Item::create([
                         'item_code' => $itemCode,
                         'tag_number' => $tagNumber,
@@ -528,6 +531,7 @@ class ItemController extends Controller
                         'item_category_id' => $category->id,
                         'item_status_id' => $status->id,
                         'price' => ($price = $get('price')) ? (float) str_replace(',', '', $price) : null,
+                        'currency_id' => $defaultCurrency?->id,
                         'purchase_date' => $purchaseDate,
                         'voucher_number' => $get('voucher number'),
                         'location' => $get('location'),

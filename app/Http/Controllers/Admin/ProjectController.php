@@ -203,7 +203,7 @@ class ProjectController extends Controller
         $user = $request->user();
         
         if (!\Hash::check($validated['password'], $user->password)) {
-            return back()->withErrors(['password' => 'Invalid password']);
+            return back()->withErrors(['password' => 'The password is incorrect.']);
         }
 
         return back()->with('password_verified', true);

@@ -348,7 +348,7 @@ const importItems = () => {
                         <table class="w-full text-sm">
                             <thead>
                                 <tr class="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100 dark:border-slate-700 dark:from-slate-900 dark:to-slate-800">
-                                    <th v-if="showCheckboxes" class="px-4 py-3 text-left">
+                                    <th v-if="showCheckboxes" class="px-4 py-3 text-left cursor-pointer" @click="selectAllItems">
                                         <input
                                             type="checkbox"
                                             :checked="selectedItems.length === items.data.length && items.data.length > 0"

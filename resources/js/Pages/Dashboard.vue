@@ -22,6 +22,18 @@ const handleImageError = (event) => {
         fallback.style.display = 'flex';
     }
 };
+
+const getActivityLink = (activity) => {
+    // Return appropriate route based on activity type
+    if (activity.subject_type === 'App\\Models\\Item') {
+        return route('items.show', activity.subject_id);
+    } else if (activity.subject_type === 'App\\Models\\Employee') {
+        return route('employees.show', activity.subject_id);
+    } else if (activity.subject_type === 'App\\Models\\Project') {
+        return route('projects.show', activity.subject_id);
+    }
+    return '#';
+};
 </script>
 
 <template>
@@ -154,6 +166,12 @@ const handleImageError = (event) => {
                                     Recent activity
                                 </h2>
                             </div>
+                            <Link
+                                :href="route('activities.index')"
+                                class="text-xs font-medium text-sky-600 hover:text-sky-500 dark:text-sky-400 dark:hover:text-sky-300"
+                            >
+                                View all
+                            </Link>
                         </div>
                         <ul
                             class="divide-y divide-slate-100 text-sm dark:divide-slate-800"
@@ -161,7 +179,8 @@ const handleImageError = (event) => {
                             <li
                                 v-for="activity in recentActivities"
                                 :key="activity.id"
-                                class="py-2"
+                                class="py-2 cursor-pointer hover:bg-sky-50 dark:hover:bg-sky-950/20 rounded-lg px-2 transition-colors"
+                                @click="$inertia.visit(getActivityLink(activity))"
                             >
                                 <div class="flex items-start gap-3">
                                     <div
