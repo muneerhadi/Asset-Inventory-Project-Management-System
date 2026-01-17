@@ -21,6 +21,14 @@ const importFile = ref(null);
 const isImporting = ref(false);
 const selectedEmployees = ref([]);
 const showBulkDeleteModal = ref(false);
+const showCheckboxes = ref(false);
+
+// Reset selections when hiding checkboxes
+watch(showCheckboxes, (newVal) => {
+    if (!newVal) {
+        selectedEmployees.value = [];
+    }
+});
 
 // Live search functionality
 watch(search, (newValue) => {
@@ -195,6 +203,24 @@ const cancelBulkDelete = () => {
 
                 <div class="rounded-xl border border-slate-200/50 bg-white/70 p-4 shadow-md dark:border-slate-700/50 dark:bg-slate-900/70 dark:backdrop-blur">
                     <div class="flex items-center gap-2">
+                        <button
+                            v-if="$page.props.auth.user.role === 'super_admin'"
+                            type="button"
+                            @click="showCheckboxes = !showCheckboxes"
+                            class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-gray-600 to-slate-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:shadow-lg"
+                        >
+                            <i class="fa-solid fa-check-square"></i>
+                            <span>{{ showCheckboxes ? 'Hide Selection' : 'Bulk Delete' }}</span>
+                        </button>
+                        <button
+                            v-if="selectedEmployees.length > 0 && showCheckboxes && $page.props.auth.user.role === 'super_admin'"
+                            type="button"
+                            @click="bulkDeleteEmployees"
+                            class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:shadow-lg"
+                        >
+                            <i class="fa-solid fa-trash"></i>
+                            <span>Delete Selected ({{ selectedEmployees.length }})</span>
+                        </button>
                         <div class="flex-1 relative">
                             <input
                                 v-model="search"
@@ -219,6 +245,14 @@ const cancelBulkDelete = () => {
                         <table class="w-full text-sm">
                             <thead>
                                 <tr class="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100 dark:border-slate-700 dark:from-slate-900 dark:to-slate-800">
+                                    <th v-if="showCheckboxes && $page.props.auth.user.role === 'super_admin'" class="px-4 py-3 text-left">
+                                        <input
+                                            type="checkbox"
+                                            :checked="selectedEmployees.length === employees.data.length && employees.data.length > 0"
+                                            @change="selectAllEmployees"
+                                            class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700"
+                                        />
+                                    </th>
                                     <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">#</th>
                                     <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Name</th>
                                     <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Position</th>
@@ -232,6 +266,14 @@ const cancelBulkDelete = () => {
                                     :key="employee.id"
                                     class="bg-white transition hover:bg-slate-50 dark:bg-slate-900/50 dark:hover:bg-slate-800/50"
                                 >
+                                    <td v-if="showCheckboxes && $page.props.auth.user.role === 'super_admin'" class="px-4 py-3">
+                                        <input
+                                            type="checkbox"
+                                            :checked="selectedEmployees.includes(employee.id)"
+                                            @change="toggleEmployeeSelection(employee.id)"
+                                            class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700"
+                                        />
+                                    </td>
                                     <td class="px-4 py-3 text-slate-700 dark:text-slate-300">{{ (employees.current_page - 1) * employees.per_page + index + 1 }}</td>
                                     <td class="px-4 py-3 font-medium text-slate-900 dark:text-slate-50">{{ employee.name }}</td>
                                     <td class="px-4 py-3 text-slate-700 dark:text-slate-300">{{ employee.position || '-' }}</td>
@@ -273,7 +315,7 @@ const cancelBulkDelete = () => {
                                     </td>
                                 </tr>
                                 <tr v-if="!employees.data.length">
-                                    <td colspan="5" class="px-4 py-8 text-center text-slate-500 dark:text-slate-400">
+                                    <td :colspan="showCheckboxes && $page.props.auth.user.role === 'super_admin' ? 6 : 5" class="px-4 py-8 text-center text-slate-500 dark:text-slate-400">
                                         <i class="fa-solid fa-inbox text-2xl mb-2 block opacity-50"></i>
                                         No employees found.
                                     </td>
@@ -476,6 +518,40 @@ const cancelBulkDelete = () => {
                         <i v-if="isImporting" class="fa-solid fa-spinner fa-spin"></i>
                         <i v-else class="fa-solid fa-upload"></i>
                         {{ isImporting ? 'Importing...' : 'Import Employees' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Bulk Delete Confirmation Modal -->
+        <div v-if="showBulkDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 dark:bg-black/70">
+            <div class="w-full max-w-md space-y-4 rounded-xl bg-white shadow-xl dark:bg-slate-900">
+                <div class="border-b border-slate-200 bg-gradient-to-r from-red-50 to-rose-50 px-6 py-4 dark:border-slate-700 dark:from-red-950/50 dark:to-rose-950/50">
+                    <h3 class="text-lg font-semibold text-red-900 dark:text-red-100">
+                        <i class="fa-solid fa-triangle-exclamation mr-2 text-red-600 dark:text-red-400"></i>
+                        Delete Multiple Employees
+                    </h3>
+                </div>
+                <div class="px-6 py-4">
+                    <p class="text-sm text-slate-700 dark:text-slate-300 mb-4">
+                        Are you sure you want to delete {{ selectedEmployees.length }} selected employees? This action cannot be undone.
+                    </p>
+                </div>
+                <div class="flex items-center justify-end gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-700 dark:bg-slate-800/50">
+                    <button
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+                        @click="cancelBulkDelete"
+                    >
+                        <i class="fa-solid fa-xmark"></i>
+                        Cancel
+                    </button>
+                    <button
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 px-6 py-2.5 text-sm font-medium text-white shadow-md transition hover:shadow-lg"
+                        @click="confirmBulkDelete"
+                    >
+                        <i class="fa-solid fa-trash"></i>
+                        Delete Employees
                     </button>
                 </div>
             </div>
