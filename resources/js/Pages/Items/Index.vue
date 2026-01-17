@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, router } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { computed, ref, watch } from 'vue';
 import { formatDate } from '@/utils/dateFormat';
 
 const props = defineProps({
@@ -17,6 +17,11 @@ const itemToDelete = ref(null);
 const showImportModal = ref(false);
 const importFile = ref(null);
 const isImporting = ref(false);
+
+const page = usePage();
+const flashSuccess = computed(() => page.props.flash?.success ?? null);
+const flashError = computed(() => page.props.flash?.error ?? null);
+const importSummary = computed(() => page.props.flash?.import_summary ?? null);
 
 // Live search functionality
 watch(search, (newValue) => {
@@ -136,6 +141,48 @@ const importItems = () => {
 
         <div class="py-6">
             <div class="mx-auto max-w-7xl space-y-4 sm:px-6 lg:px-8">
+                <div
+                    v-if="flashSuccess"
+                    class="rounded-xl border border-emerald-200/50 bg-emerald-50/70 p-4 text-sm text-emerald-800 shadow-md dark:border-emerald-900/30 dark:bg-emerald-950/20 dark:text-emerald-200"
+                >
+                    {{ flashSuccess }}
+                </div>
+                <div
+                    v-if="flashError"
+                    class="rounded-xl border border-rose-200/50 bg-rose-50/70 p-4 text-sm text-rose-800 shadow-md dark:border-rose-900/30 dark:bg-rose-950/20 dark:text-rose-200"
+                >
+                    {{ flashError }}
+                </div>
+
+                <div
+                    v-if="importSummary"
+                    class="rounded-xl border border-slate-200/50 bg-white/70 p-4 shadow-md dark:border-slate-700/50 dark:bg-slate-900/70"
+                >
+                    <div class="flex items-center justify-between gap-3">
+                        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-50">
+                            Import Summary
+                        </h3>
+                        <div class="text-xs text-slate-600 dark:text-slate-400">
+                            Imported: <span class="font-semibold text-slate-900 dark:text-slate-50">{{ importSummary.imported ?? 0 }}</span>
+                            |
+                            Rejected: <span class="font-semibold text-slate-900 dark:text-slate-50">{{ importSummary.skipped_errors ?? 0 }}</span>
+                            |
+                            Duplicates: <span class="font-semibold text-slate-900 dark:text-slate-50">{{ importSummary.skipped_duplicates ?? 0 }}</span>
+                        </div>
+                    </div>
+
+                    <div v-if="importSummary.errors && importSummary.errors.length" class="mt-3">
+                        <div class="text-xs font-medium uppercase tracking-wide text-slate-600 dark:text-slate-400">
+                            Rejected rows
+                        </div>
+                        <ul class="mt-2 space-y-1 text-sm text-slate-700 dark:text-slate-300">
+                            <li v-for="(e, idx) in importSummary.errors" :key="idx" class="rounded-md bg-rose-50 px-3 py-2 dark:bg-rose-950/20">
+                                {{ e }}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
                 <div class="grid gap-4 md:grid-cols-4">
                     <div
                         class="overflow-hidden rounded-xl border border-amber-200/50 bg-gradient-to-br from-amber-100/60 via-orange-50/40 to-yellow-100/50 p-4 text-left shadow-md dark:border-amber-900/30 dark:bg-gradient-to-br dark:from-amber-950/40 dark:via-slate-900/60 dark:to-yellow-950/40"

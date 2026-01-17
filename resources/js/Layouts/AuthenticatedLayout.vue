@@ -1,16 +1,18 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 
 const showingNavigationDropdown = ref(false);
 
 const isDark = ref(false);
 const sidebarVisible = ref(false);
+const isNavigating = ref(false);
+let loaderTimer = null;
 
 const applyTheme = (value) => {
     const root = document.documentElement;
@@ -39,6 +41,34 @@ onMounted(() => {
     requestAnimationFrame(() => {
         sidebarVisible.value = true;
     });
+
+    router.on('start', () => {
+        if (loaderTimer) {
+            clearTimeout(loaderTimer);
+        }
+        loaderTimer = setTimeout(() => {
+            isNavigating.value = true;
+        }, 150);
+    });
+
+    const stop = () => {
+        if (loaderTimer) {
+            clearTimeout(loaderTimer);
+            loaderTimer = null;
+        }
+        isNavigating.value = false;
+    };
+
+    router.on('finish', stop);
+    router.on('cancel', stop);
+    router.on('error', stop);
+});
+
+onBeforeUnmount(() => {
+    if (loaderTimer) {
+        clearTimeout(loaderTimer);
+        loaderTimer = null;
+    }
 });
 
 watch(isDark, (value) => {
@@ -52,6 +82,17 @@ const toggleTheme = () => {
 
 <template>
     <div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 text-slate-900 dark:bg-gradient-to-br dark:from-slate-950 dark:via-blue-950/30 dark:to-slate-950 dark:text-slate-100">
+        <div
+            v-show="isNavigating"
+            class="fixed left-0 top-0 z-[9999] h-1.5 w-full bg-transparent"
+            aria-hidden="true"
+        >
+            <div class="relative h-full w-full overflow-hidden">
+                <div class="absolute inset-0 bg-slate-900/5 dark:bg-white/5"></div>
+                <div class="loader-aurora absolute inset-y-0 left-0 w-[65%] rounded-r-full"></div>
+                <div class="loader-glow absolute inset-y-0 left-0 w-[35%] rounded-r-full"></div>
+            </div>
+        </div>
         <div class="flex min-h-screen">
             <!-- Sidebar navigation (left) -->
             <aside
@@ -350,3 +391,23 @@ const toggleTheme = () => {
         </div>
     </div>
 </template>
+
+<style scoped>
+@keyframes auroraSlide {
+    0% { transform: translateX(-80%); }
+    100% { transform: translateX(220%); }
+}
+
+.loader-aurora {
+    background: linear-gradient(90deg, rgba(14,165,233,0) 0%, rgba(14,165,233,0.95) 18%, rgba(99,102,241,0.95) 50%, rgba(217,70,239,0.9) 82%, rgba(217,70,239,0) 100%);
+    filter: saturate(1.2);
+    animation: auroraSlide 0.9s ease-in-out infinite;
+}
+
+.loader-glow {
+    background: radial-gradient(closest-side, rgba(99,102,241,0.9), rgba(99,102,241,0));
+    filter: blur(6px);
+    opacity: 0.9;
+    animation: auroraSlide 0.9s ease-in-out infinite;
+}
+</style>

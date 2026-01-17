@@ -52,7 +52,7 @@ const handleImageError = (event) => {
                 Error: {{ error }}
             </div>
             <!-- Metrics cards -->
-            <div class="grid gap-4 md:grid-cols-4">
+            <div class="grid gap-4 md:grid-cols-3">
                 <div
                     class="flex flex-col justify-between overflow-hidden rounded-xl border border-blue-200/60 bg-gradient-to-br from-blue-100/60 via-blue-50/40 to-sky-100/50 p-4 text-left shadow-md transition hover:shadow-lg dark:border-blue-900/40 dark:bg-gradient-to-br dark:from-blue-950/40 dark:via-slate-900/60 dark:to-sky-950/40"
                 >
@@ -105,30 +105,6 @@ const handleImageError = (event) => {
                     </Link>
                 </div>
 
-                <Link
-                    :href="route('items.in-stock')"
-                    class="flex flex-col justify-between overflow-hidden rounded-xl border border-green-200/60 bg-gradient-to-br from-green-100/60 via-emerald-50/40 to-teal-100/50 p-4 text-left shadow-md transition hover:shadow-lg dark:border-green-900/40 dark:bg-gradient-to-br dark:from-green-950/40 dark:via-slate-900/60 dark:to-teal-950/40"
-                >
-                    <div class="flex items-center justify-between">
-                        <p
-                            class="text-xs font-medium uppercase tracking-wide text-slate-600 dark:text-slate-400"
-                        >
-                            In Stock Items
-                        </p>
-                        <span class="text-green-600 dark:text-green-400">
-                            <i class="fa-solid fa-warehouse text-lg"></i>
-                        </span>
-                    </div>
-                    <p
-                        class="mt-3 text-2xl font-semibold text-slate-900 dark:text-slate-50"
-                    >
-                        {{ metrics.in_stock ?? 0 }}
-                    </p>
-                    <p class="mt-2 inline-flex items-center text-xs font-medium text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300">
-                        View items
-                    </p>
-                </Link>
-
                 <div
                     class="flex flex-col justify-between overflow-hidden rounded-xl border border-purple-200/60 bg-gradient-to-br from-purple-100/60 via-pink-50/40 to-violet-100/50 p-4 text-left shadow-md transition hover:shadow-lg dark:border-purple-900/40 dark:bg-gradient-to-br dark:from-purple-950/40 dark:via-slate-900/60 dark:to-violet-950/40"
                 >
@@ -157,11 +133,10 @@ const handleImageError = (event) => {
             </div>
 
             <!-- Main dashboard content -->
-            <div class="grid gap-6" :class="userRole === 'project_manager' ? 'lg:grid-cols-2' : 'lg:grid-cols-3'">
-                <div class="space-y-4" :class="userRole === 'project_manager' ? 'lg:col-span-1' : 'lg:col-span-2'">
-                    <!-- Recent activity (big card) - Only for super admin -->
+            <div class="grid gap-6 lg:grid-cols-3">
+                <div class="space-y-4 lg:col-span-2">
+                    <!-- Recent activity (big card) -->
                     <section
-                        v-if="userRole === 'super_admin'"
                         class="overflow-hidden rounded-xl border border-sky-200/50 bg-gradient-to-b from-sky-50/80 via-white to-blue-50/60 p-4 shadow-md dark:border-sky-900/30 dark:bg-gradient-to-b dark:from-sky-950/30 dark:via-slate-900 dark:to-blue-950/20"
                     >
                         <div class="mb-3 flex items-center justify-between">
@@ -179,12 +154,6 @@ const handleImageError = (event) => {
                                     Recent activity
                                 </h2>
                             </div>
-                            <Link
-                                :href="route('activities.index')"
-                                class="text-xs font-medium text-sky-600 hover:text-sky-500 dark:text-sky-400 dark:hover:text-sky-300"
-                            >
-                                View all
-                            </Link>
                         </div>
                         <ul
                             class="divide-y divide-slate-100 text-sm dark:divide-slate-800"
@@ -194,25 +163,12 @@ const handleImageError = (event) => {
                                 :key="activity.id"
                                 class="py-2"
                             >
-                                <Link
-                                    :href="route('activities.show', activity.id)"
-                                    class="flex items-start gap-3 rounded-lg p-2 transition hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                                >
+                                <div class="flex items-start gap-3">
                                     <div
-                                        :class="[
-                                            'mt-1 flex h-7 w-7 items-center justify-center rounded-full text-slate-500 dark:text-slate-300',
-                                            activity.action.includes('delete') || activity.action.includes('removed')
-                                                ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400'
-                                                : 'bg-slate-100 dark:bg-slate-800'
-                                        ]"
+                                        class="mt-1 flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-300"
                                     >
                                         <i
-                                            :class="[
-                                                'text-[10px]',
-                                                activity.action.includes('delete') || activity.action.includes('removed')
-                                                    ? 'fa-solid fa-trash'
-                                                    : 'fa-solid fa-circle-dot'
-                                            ]"
+                                            class="fa-solid fa-circle-dot text-[10px]"
                                         ></i>
                                     </div>
                                     <div
@@ -229,12 +185,7 @@ const handleImageError = (event) => {
                                                 }}
                                             </p>
                                             <p
-                                                :class="[
-                                                    'mt-0.5',
-                                                    activity.action.includes('delete') || activity.action.includes('removed')
-                                                        ? 'text-red-700 dark:text-red-300'
-                                                        : 'text-slate-800 dark:text-slate-100'
-                                                ]"
+                                                class="mt-0.5 text-slate-800 dark:text-slate-100"
                                             >
                                                 {{ activity.action }}
                                                 <span
@@ -246,9 +197,8 @@ const handleImageError = (event) => {
                                                 </span>
                                             </p>
                                         </div>
-                                        <i class="fa-solid fa-chevron-right text-xs text-slate-400 mt-2"></i>
                                     </div>
-                                </Link>
+                                </div>
                             </li>
                             <li
                                 v-if="
@@ -262,7 +212,7 @@ const handleImageError = (event) => {
                         </ul>
                     </section>
 
-                    <div class="grid gap-4" :class="userRole === 'project_manager' ? 'md:grid-cols-1' : 'md:grid-cols-2'">
+                    <div class="grid gap-4 md:grid-cols-2">
                         <!-- Project manager-only deadlines card -->
                         <section
                             v-if="userRole === 'project_manager'"
@@ -289,7 +239,7 @@ const handleImageError = (event) => {
                                         >
                                             {{ project.name }}
                                         </p>
-                                        <p class="text-xs text-slate-500">
+                                        <p class="hidden text-xs text-slate-500">
                                             {{ project.code }}
                                         </p>
                                     </div>
@@ -367,9 +317,8 @@ const handleImageError = (event) => {
                             </ul>
                         </section>
 
-                        <!-- Recent employees card - Only for super admin -->
+                        <!-- Recent employees card -->
                         <section
-                            v-if="userRole === 'super_admin'"
                             class="overflow-hidden rounded-xl border border-emerald-200/50 bg-gradient-to-b from-emerald-50/80 via-white to-green-50/60 p-4 shadow-md dark:border-emerald-900/30 dark:bg-gradient-to-b dark:from-emerald-950/30 dark:via-slate-900 dark:to-green-950/20"
                         >
                             <div class="mb-3 flex items-center justify-between">
@@ -458,9 +407,8 @@ const handleImageError = (event) => {
                             </ul>
                         </section>
 
-                        <!-- Recent items card - Only for super admin -->
+                        <!-- Recent items card -->
                         <section
-                            v-if="userRole === 'super_admin'"
                             class="overflow-hidden rounded-xl border border-amber-200/50 bg-gradient-to-b from-amber-50/80 via-white to-orange-50/60 p-4 shadow-md dark:border-amber-900/30 dark:bg-gradient-to-b dark:from-amber-950/30 dark:via-slate-900 dark:to-orange-950/20"
                         >
                             <div class="mb-3 flex items-center justify-between">

@@ -364,7 +364,24 @@ class ItemController extends Controller
         ]);
 
         try {
-            $path = $validated['file']->getRealPath();
+            $uploadedFile = $validated['file'];
+            $path = $uploadedFile->getRealPath();
+            $extension = strtolower($uploadedFile->getClientOriginalExtension() ?: '');
+
+            $fileSignature = @file_get_contents($path, false, null, 0, 2);
+            if ($fileSignature === 'PK' && ! in_array($extension, ['xlsx', 'xls'], true)) {
+                return redirect()->back()->with(
+                    'error',
+                    'This file looks like an Excel file (.xlsx) but was uploaded as a non-Excel format. Please upload the original .xlsx file (requires phpoffice/phpspreadsheet) or export it as a real .csv.'
+                );
+            }
+
+            if (in_array($extension, ['xlsx', 'xls'], true) && ! class_exists(\PhpOffice\PhpSpreadsheet\IOFactory::class)) {
+                return redirect()->back()->with(
+                    'error',
+                    'Excel (.xlsx/.xls) import is not enabled on the server. Please install phpoffice/phpspreadsheet or upload a .csv file instead.'
+                );
+            }
             $handle = fopen($path, 'r');
 
             if (!$handle) {
@@ -385,12 +402,24 @@ class ItemController extends Controller
                 $map[strtolower(trim($column))] = $index;
             }
 
+            if (! array_key_exists('asset tag no', $map) || ! array_key_exists('item name', $map)) {
+                fclose($handle);
+                return redirect()->back()->with(
+                    'error',
+                    'Invalid import file format. Required columns are missing: Asset Tag NO and Item Name.'
+                );
+            }
+
             $created = 0;
             $errors = [];
             $duplicates = [];
             $missingEmployees = [];
             $existingTagNumbers = Item::pluck('tag_number')->toArray();
             $rowNumber = 1;
+            $allowedProjectIds = null;
+            if (! $user->isSuperAdmin()) {
+                $allowedProjectIds = $user->projects()->pluck('projects.id')->toArray();
+            }
 
             while (($row = fgetcsv($handle)) !== false) {
                 $rowNumber++;
@@ -436,6 +465,7 @@ class ItemController extends Controller
                     
                     if ($isDuplicate) {
                         $duplicates[] = $tagNumber . ' (last digits: ' . $lastDigits . ')';
+                        $errors[] = "Row {$rowNumber} (Tag: {$tagNumber}): Duplicate tag number (last digits: {$lastDigits})";
                         continue;
                     }
                 }
@@ -461,6 +491,17 @@ class ItemController extends Controller
                     $category = $categoryName ? ItemCategory::firstOrCreate(['name' => $categoryName]) : ItemCategory::first();
                     $status = $statusName ? ItemStatus::where('name', $statusName)->first() : ItemStatus::where('is_default', true)->first();
                     $project = $projectName ? Project::where('name', $projectName)->first() : null;
+
+                    if ($projectName) {
+                        if (! $project) {
+                            $errors[] = "Row {$rowNumber} (Tag: {$tagNumber}): Project '{$projectName}' not found for this item";
+                            continue;
+                        }
+                        if ($allowedProjectIds !== null && ! in_array($project->id, $allowedProjectIds, true)) {
+                            $errors[] = "Row {$rowNumber} (Tag: {$tagNumber}): Project '{$projectName}' not found for this item";
+                            continue;
+                        }
+                    }
 
                     if (!$category) {
                         $category = ItemCategory::create(['name' => 'General']);
@@ -556,9 +597,22 @@ class ItemController extends Controller
             }
             if (!empty($errors)) {
                 $message .= ' ' . count($errors) . ' items had errors and were skipped.';
+                $message .= ' ' . implode(' | ', array_slice($errors, 0, 3));
+                if (count($errors) > 3) {
+                    $message .= ' | and ' . (count($errors) - 3) . ' more.';
+                }
             }
 
-            return redirect()->route('items.index')->with('success', $message);
+            return redirect()->route('items.index')
+                ->with('success', $message)
+                ->with('import_summary', [
+                    'imported' => $created,
+                    'skipped_duplicates' => count($duplicates),
+                    'skipped_errors' => count($errors),
+                    'errors' => array_values($errors),
+                    'duplicate_tags' => array_values($duplicates),
+                    'missing_employees' => array_values($missingEmployees),
+                ]);
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Error processing file: ' . $e->getMessage());
         }
