@@ -4,7 +4,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import { formatDate } from '@/utils/dateFormat';
 
 const props = defineProps({
-    activities: Object,
+    activities: Object, 
 });
 </script>
 

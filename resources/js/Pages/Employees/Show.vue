@@ -5,7 +5,7 @@ import { ref, computed } from 'vue';
 import { resolveImage } from '@/utils/imageResolver';
 
 const props = defineProps({
-    employee: Object,
+    employee: Object, 
     availableItems: {
         type: Array,
         default: () => []

@@ -7,7 +7,7 @@ export function formatDate(date) {
     if (!date) return '-';
 
     const dateObj = typeof date === 'string' ? new Date(date) : date;
-
+ 
     if (isNaN(dateObj.getTime())) return '-';
 
     const year = dateObj.getFullYear();

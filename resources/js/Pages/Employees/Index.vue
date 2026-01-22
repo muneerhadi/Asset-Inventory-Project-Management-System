@@ -4,7 +4,7 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, watch, computed } from 'vue';
 
 const props = defineProps({
-    employees: Object,
+    employees: Object, 
     stats: Object,
     filters: Object,
     availableItems: {
