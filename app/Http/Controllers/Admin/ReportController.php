@@ -176,4 +176,75 @@ class ReportController extends Controller
             'statuses' => ItemStatus::orderBy('name')->get(['id', 'name']),
         ]);
     }
+
+    public function printCustom(Request $request): Response
+    {
+        $user = $request->user();
+
+        $filters = [
+            'project_ids' => $request->input('project_ids', []),
+            'status_ids' => $request->input('status_ids', []),
+            'assignment_status' => $request->input('assignment_status'),
+            'from' => $request->input('from'),
+            'to' => $request->input('to'),
+            'price_min' => $request->input('price_min') ? (float) $request->input('price_min') : null,
+            'price_max' => $request->input('price_max') ? (float) $request->input('price_max') : null,
+        ];
+
+        $itemsQuery = Item::with(['status', 'category', 'project', 'itemEmployeeAssignments', 'currency']);
+
+        if (! $user->isSuperAdmin()) {
+            $projectIds = $user->projects()->pluck('projects.id');
+            $itemsQuery->whereIn('project_id', $projectIds);
+        }
+
+        if (!empty($filters['project_ids'])) {
+            $itemsQuery->whereIn('project_id', $filters['project_ids']);
+        }
+
+        if (!empty($filters['status_ids'])) {
+            $itemsQuery->whereIn('item_status_id', $filters['status_ids']);
+        }
+
+        if ($filters['from']) {
+            $itemsQuery->whereDate('purchase_date', '>=', $filters['from']);
+        }
+
+        if ($filters['to']) {
+            $itemsQuery->whereDate('purchase_date', '<=', $filters['to']);
+        }
+
+        if ($filters['price_min']) {
+            $itemsQuery->where('price', '>=', $filters['price_min']);
+        }
+
+        if ($filters['price_max']) {
+            $itemsQuery->where('price', '<=', $filters['price_max']);
+        }
+
+        $items = $itemsQuery->orderBy('purchase_date')->get()->map(function ($item) {
+            $item->assignment_status = $item->itemEmployeeAssignments->isNotEmpty() ? 'In Use' : 'In Stock';
+            return $item;
+        });
+
+        if ($filters['assignment_status']) {
+            $items = $items->filter(function ($item) use ($filters) {
+                return $item->assignment_status === $filters['assignment_status'];
+            });
+        }
+
+        $projectsQuery = Project::orderBy('name');
+        
+        if (! $user->isSuperAdmin()) {
+            $projectIds = $user->projects()->pluck('projects.id');
+            $projectsQuery->whereIn('id', $projectIds);
+        }
+
+        return Inertia::render('Reports/PrintCustom', [
+            'items' => $items,
+            'filters' => $filters,
+            'projects' => $projectsQuery->get(['id', 'code', 'name']),
+            'statuses' => ItemStatus::orderBy('name')->get(['id', 'name']),
+        ]);
+    }
 }

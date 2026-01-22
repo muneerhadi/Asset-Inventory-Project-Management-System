@@ -133,6 +133,15 @@ class EmployeeController extends Controller
         ]);
     }
 
+    public function print(Request $request, Employee $employee): Response
+    {
+        $employee->load(['itemEmployeeAssignments.item.category', 'itemEmployeeAssignments.item.status', 'itemEmployeeAssignments.item.currency']);
+
+        return Inertia::render('Employees/Print', [
+            'employee' => $employee,
+        ]);
+    }
+
     public function edit(Request $request, Employee $employee): Response
     {
         return Inertia::render('Employees/Edit', [

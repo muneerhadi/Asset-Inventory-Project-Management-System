@@ -115,6 +115,21 @@ class ProjectController extends Controller
         ]);
     }
 
+    public function print(Request $request, Project $project): Response
+    {
+        $user = $request->user();
+
+        if (! $user->isSuperAdmin() && ! $user->projects()->where('projects.id', $project->id)->exists()) {
+            abort(403);
+        }
+
+        $project->load(['items.status', 'items.category', 'items.currency', 'managers']);
+
+        return Inertia::render('Projects/Print', [
+            'project' => $project,
+        ]);
+    }
+
     public function edit(Request $request, Project $project): Response
     {
         $user = $request->user();

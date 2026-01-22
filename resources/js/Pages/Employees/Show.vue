@@ -101,6 +101,13 @@ const filteredItems = computed(() => {
                 </div>
                 <div class="flex gap-2">
                     <Link
+                        :href="route('employees.print', employee.id)"
+                        class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-sky-600 px-4 py-2.5 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-blue-700 dark:to-sky-700"
+                    >
+                        <i class="fa-solid fa-print"></i>
+                        Print
+                    </Link>
+                    <Link
                         :href="route('employees.edit', employee.id)"
                         class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-600 to-orange-600 px-4 py-2.5 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-amber-700 dark:to-orange-700"
                     >

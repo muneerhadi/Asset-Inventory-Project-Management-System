@@ -42,9 +42,6 @@ const clearFilters = () => {
     applyFilters();
 };
 
-const printPage = () => {
-    window.print();
-};
 
 const toggleProject = (projectId) => {
     const index = localFilters.value.project_ids.indexOf(projectId);
@@ -97,14 +94,13 @@ const toggleAllStatuses = () => {
                     </p>
                 </div>
                 <div class="flex gap-2 print:hidden">
-                    <button
-                        type="button"
+                    <Link
+                        :href="route('reports.custom.print', localFilters)"
                         class="rounded-lg bg-gradient-to-r from-blue-600 to-sky-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-blue-700 dark:to-sky-700"
-                        @click="printPage"
                     >
                         <i class="fa-solid fa-print mr-2"></i>
                         Print
-                    </button>
+                    </Link>
                     <Link
                         :href="route('reports.index')"
                         class="rounded-lg bg-slate-200 px-4 py-2 text-sm font-medium text-slate-700 shadow-md transition hover:shadow-lg dark:bg-slate-700 dark:text-slate-200"
@@ -394,59 +390,6 @@ const toggleAllStatuses = () => {
                     </div>
                 </div>
 
-                <!-- Print View -->
-                <div class="hidden print:block">
-                    <!-- Print Header -->
-                    <div class="border-b-4 border-slate-900 pb-8 text-center mb-8">
-                        <div class="mb-4 flex justify-center">
-                            <div class="h-24 w-24">
-                                <img src="/storage/logo/union-aid-logo.png" alt="Logo" class="h-full w-full object-contain">
-                            </div>
-                        </div>
-                        <h1 class="text-4xl font-bold text-slate-900 tracking-wide">
-                            UNION AID
-                        </h1>
-                        <p class="mt-3 text-sm font-medium text-slate-700">
-                            {{ formatDate(new Date()) }}
-                        </p>
-                    </div>
-
-                    <!-- Print Table -->
-                    <div class="mt-8">
-                        <table class="w-full text-xs border-collapse">
-                            <thead>
-                                <tr class="border-b-2 border-slate-900 bg-slate-100">
-                                    <th class="border border-slate-900 px-3 py-2 text-left font-bold">Project</th>
-                                    <th class="border border-slate-900 px-3 py-2 text-left font-bold">Code</th>
-                                    <th class="border border-slate-900 px-3 py-2 text-left font-bold">Name</th>
-                                    <th class="border border-slate-900 px-3 py-2 text-left font-bold">Status</th>
-                                    <th class="border border-slate-900 px-3 py-2 text-left font-bold">Situation</th>
-                                    <th class="border border-slate-900 px-3 py-2 text-left font-bold">Purchase Date</th>
-                                    <th class="border border-slate-900 px-3 py-2 text-left font-bold">Location</th>
-                                    <th class="border border-slate-900 px-3 py-2 text-left font-bold">Price</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                    <tr v-for="item in items" :key="item.id" class="border border-slate-900">
-                                    <td class="border border-slate-900 px-3 py-2 text-black">{{ item.project?.name || '-' }}</td>
-                                    <td class="border border-slate-900 px-3 py-2 text-black">{{ item.name }}</td>
-                                    <td class="border border-slate-900 px-3 py-2 text-black">{{ item.assignment_status }}</td>
-                                    <td class="border border-slate-900 px-3 py-2 text-black">{{ item.status?.name || '-' }}</td>
-                                    <td class="border border-slate-900 px-3 py-2 text-black">{{ formatDate(item.purchase_date) }}</td>
-                                    <td class="border border-slate-900 px-3 py-2 text-black">
-                                        {{ item.location || '-' }}<span v-if="item.sublocation"> / {{ item.sublocation }}</span>
-                                    </td>
-                                    <td class="border border-slate-900 px-3 py-2 text-black">{{ item.price ? parseFloat(item.price).toFixed(2) + ' ' + (item.currency?.code || '') : '-' }}</td>
-                                </tr>
-                                <tr v-if="!items.length">
-                                    <td colspan="8" class="border border-slate-900 px-3 py-4 text-center font-medium text-black">
-                                        No items match the selected filters.
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
             </div>
         </div>
     </AuthenticatedLayout>

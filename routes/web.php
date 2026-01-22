@@ -26,6 +26,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('employees', EmployeeController::class);
         Route::post('employees/import', [EmployeeController::class, 'import'])->name('employees.import');
         Route::post('employees/bulk-delete', [EmployeeController::class, 'bulkDelete'])->name('employees.bulk-delete');
+        Route::get('employees/{employee}/print', [EmployeeController::class, 'print'])->name('employees.print');
         Route::post('employees/{employee}/assign-item', [EmployeeController::class, 'assignItem'])
             ->name('employees.assign-item');
         Route::delete('employees/{employee}/unassign-item/{assignment}', [EmployeeController::class, 'unassignItem'])
@@ -43,6 +44,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('projects/verify-password', [ProjectController::class, 'verifyPassword'])
                 ->name('projects.verify-password');
         });
+        Route::get('projects/{project}/print', [ProjectController::class, 'print'])->name('projects.print');
         Route::get('projects/{project}/export-items', [ProjectController::class, 'exportItems'])
             ->name('projects.export-items');
         Route::post('projects/{project}/import-employees', [ProjectController::class, 'importEmployees'])
@@ -81,6 +83,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('reports.economy');
         Route::get('reports/custom', [ReportController::class, 'custom'])
             ->name('reports.custom');
+        Route::get('reports/custom/print', [ReportController::class, 'printCustom'])
+            ->name('reports.custom.print');
 
         // Search
         Route::get('search/items', [SearchController::class, 'items'])

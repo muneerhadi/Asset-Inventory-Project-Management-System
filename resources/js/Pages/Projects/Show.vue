@@ -147,7 +147,7 @@ const importItems = () => {
                         Export CSV
                     </a>
                     <Link
-                        :href="route('reports.project', project.id)"
+                        :href="route('projects.print', project.id)"
                         class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-sky-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-blue-700 dark:to-sky-700"
                     >
                         <i class="fa-solid fa-print"></i>

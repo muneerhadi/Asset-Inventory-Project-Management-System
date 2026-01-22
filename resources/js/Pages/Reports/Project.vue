@@ -3,6 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 import { formatDate } from '@/utils/dateFormat';
+import { resolveImage } from '@/utils/imageResolver';
 
 const props = defineProps({
     project: Object,
@@ -178,61 +179,93 @@ const printPage = () => {
 
                 <!-- Print View Content -->
                 <div class="hidden print:block">
-                    <!-- Print Header -->
-                    <div class="border-b-4 border-slate-900 pb-8 text-center mb-8">
-                        <!-- Logo -->
-                        <div class="mb-4 flex justify-center">
-                            <div class="h-24 w-24">
-                                <img src="/storage/logo/union-aid-logo.png" alt="Logo" class="h-full w-full object-contain">
+                    <!-- Header Section -->
+                    <div class="mb-6 relative">
+                        <!-- Top Row: Project Logo (Left), Union Aid Logo (Center), Date (Right) -->
+                        <div class="flex justify-between items-start mb-4">
+                            <!-- Project Logo - Left -->
+                            <div class="w-32 h-32 border-2 border-slate-900 flex items-center justify-center bg-white flex-shrink-0">
+                                <img 
+                                    v-if="project.logo_path" 
+                                    :src="resolveImage(project.logo_path)" 
+                                    alt="Project logo" 
+                                    class="w-full h-full object-contain"
+                                />
+                                <div v-else class="w-full h-full flex items-center justify-center bg-slate-100">
+                                    <i class="fa-solid fa-folder text-4xl text-slate-400"></i>
+                                </div>
+                            </div>
+                            
+                            <!-- Union Aid Logo - Center -->
+                            <div class="flex-1 flex justify-center items-start">
+                                <div class="h-20 w-20">
+                                    <img src="/storage/logo/union-aid-logo.png" alt="Union Aid Logo" class="h-full w-full object-contain" />
+                                </div>
+                            </div>
+                            
+                            <!-- Date - Right -->
+                            <div class="text-right flex-shrink-0">
+                                <p class="text-sm font-semibold text-slate-900">
+                                    Date: {{ formatDate(new Date()) }}
+                                </p>
                             </div>
                         </div>
-                        
-                        <!-- UNION AID Title -->
-                        <h1 class="text-4xl font-bold text-slate-900 tracking-wide">
-                            UNION AID
-                        </h1>
-                        
-                        <!-- Server Time -->
-                        <p class="mt-3 text-sm font-medium text-slate-700">
-                            {{ formatDate(new Date()) }}
-                        </p>
+
+                        <!-- Title and Project Name - Below Logo -->
+                        <div class="text-center mb-6">
+                            <!-- Project Inventory Text -->
+                            <h1 class="text-2xl font-bold text-slate-900 mb-2">
+                                Project Inventory Report
+                            </h1>
+                            
+                            <!-- Project Name -->
+                            <h2 class="text-xl font-semibold text-slate-800">
+                                {{ project.name }}
+                            </h2>
+                            <p v-if="project.code" class="text-sm text-slate-600 mt-1">
+                                Code: {{ project.code }}
+                            </p>
+                        </div>
                     </div>
 
 
                     <!-- Items Table for Print -->
-                    <div class="mt-8">
-                        <table class="w-full text-xs border-collapse">
+                    <div class="mb-6">
+                        <h3 class="text-lg font-bold text-slate-900 mb-3 border-b-2 border-slate-900 pb-1">
+                            Project Items
+                        </h3>
+                        <table class="w-full border-collapse border-2 border-slate-900 text-xs">
                             <thead>
-                                <tr class="border-b-2 border-slate-900 bg-slate-100">
-                                    <th class="border border-slate-900 px-3 py-2 text-left font-bold">#</th>
-                                    <th class="border border-slate-900 px-3 py-2 text-left font-bold">Tag</th>
-                                    <th class="border border-slate-900 px-3 py-2 text-left font-bold">Name</th>
-                                    <th class="border border-slate-900 px-3 py-2 text-left font-bold">Type</th>
-                                    <th class="border border-slate-900 px-3 py-2 text-left font-bold">Situation</th>
-                                    <th class="border border-slate-900 px-3 py-2 text-left font-bold">Location</th>
-                                    <th class="border border-slate-900 px-3 py-2 text-left font-bold">Price</th>
-                                    <th class="border border-slate-900 px-3 py-2 text-left font-bold">Purchase Date</th>
-                                    <th class="border border-slate-900 px-3 py-2 text-left font-bold">Model</th>
-                                    <th class="border border-slate-900 px-3 py-2 text-left font-bold">Serial Number</th>
+                                <tr class="bg-slate-100">
+                                    <th class="border-2 border-slate-900 px-3 py-2 text-left font-bold">#</th>
+                                    <th class="border-2 border-slate-900 px-3 py-2 text-left font-bold">Tag Number</th>
+                                    <th class="border-2 border-slate-900 px-3 py-2 text-left font-bold">Item Name</th>
+                                    <th class="border-2 border-slate-900 px-3 py-2 text-left font-bold">Category</th>
+                                    <th class="border-2 border-slate-900 px-3 py-2 text-left font-bold">Status</th>
+                                    <th class="border-2 border-slate-900 px-3 py-2 text-left font-bold">Location</th>
+                                    <th class="border-2 border-slate-900 px-3 py-2 text-left font-bold">Price</th>
+                                    <th class="border-2 border-slate-900 px-3 py-2 text-left font-bold">Purchase Date</th>
+                                    <th class="border-2 border-slate-900 px-3 py-2 text-left font-bold">Model</th>
+                                    <th class="border-2 border-slate-900 px-3 py-2 text-left font-bold">Serial Number</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="(item, index) in items" :key="item.id" class="border border-slate-900">
-                                    <td class="border border-slate-900 px-3 py-2 text-black">{{ index + 1 }}</td>
-                                    <td class="border border-slate-900 px-3 py-2 text-black">{{ item.tag_number || '-' }}</td>
-                                    <td class="border border-slate-900 px-3 py-2 text-black">{{ item.name }}</td>
-                                    <td class="border border-slate-900 px-3 py-2 text-black">{{ item.category?.name || '-' }}</td>
-                                    <td class="border border-slate-900 px-3 py-2 text-black">{{ item.status?.name || '-' }}</td>
-                                    <td class="border border-slate-900 px-3 py-2 text-black">
+                                <tr v-for="(item, index) in items" :key="item.id">
+                                    <td class="border-2 border-slate-900 px-3 py-2">{{ index + 1 }}</td>
+                                    <td class="border-2 border-slate-900 px-3 py-2">{{ item.tag_number || '-' }}</td>
+                                    <td class="border-2 border-slate-900 px-3 py-2">{{ item.name }}</td>
+                                    <td class="border-2 border-slate-900 px-3 py-2">{{ item.category?.name || '-' }}</td>
+                                    <td class="border-2 border-slate-900 px-3 py-2">{{ item.status?.name || '-' }}</td>
+                                    <td class="border-2 border-slate-900 px-3 py-2">
                                         {{ item.location || '-' }}<span v-if="item.sublocation"> / {{ item.sublocation }}</span>
                                     </td>
-                                    <td class="border border-slate-900 px-3 py-2 text-black">{{ item.price ? parseFloat(item.price).toFixed(2) + ' ' + (item.currency?.code || '') : '-' }}</td>
-                                    <td class="border border-slate-900 px-3 py-2 text-black">{{ item.purchase_date ? formatDate(item.purchase_date) : '-' }}</td>
-                                    <td class="border border-slate-900 px-3 py-2 text-black">{{ item.model || '-' }}</td>
-                                    <td class="border border-slate-900 px-3 py-2 text-black">{{ item.serial_number || '-' }}</td>
+                                    <td class="border-2 border-slate-900 px-3 py-2">{{ item.price ? parseFloat(item.price).toFixed(2) + ' ' + (item.currency?.code || '') : '-' }}</td>
+                                    <td class="border-2 border-slate-900 px-3 py-2">{{ item.purchase_date ? formatDate(item.purchase_date) : '-' }}</td>
+                                    <td class="border-2 border-slate-900 px-3 py-2">{{ item.model || '-' }}</td>
+                                    <td class="border-2 border-slate-900 px-3 py-2">{{ item.serial_number || '-' }}</td>
                                 </tr>
                                 <tr v-if="!items.length">
-                                    <td colspan="10" class="border border-slate-900 px-3 py-4 text-center font-medium">
+                                    <td colspan="10" class="border-2 border-slate-900 px-4 py-4 text-center font-medium">
                                         No items in this project.
                                     </td>
                                 </tr>
@@ -246,6 +279,24 @@ const printPage = () => {
 </template>
 
 <style scoped>
-@page { margin: 0; }
-html, body { margin: 0 !important; padding: 0 !important; }
+@page {
+    margin: 0.5in;
+    size: A4;
+}
+
+@media print {
+    .print\:hidden {
+        display: none !important;
+    }
+    
+    body {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+    
+    /* Ensure borders print correctly */
+    table, td, th {
+        border-collapse: collapse !important;
+    }
+}
 </style>
