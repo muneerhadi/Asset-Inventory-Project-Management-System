@@ -9,7 +9,7 @@ const props = defineProps({
     },
     active: {
         type: Boolean,
-    },
+    }, 
 });
 
 const classes = computed(() =>
