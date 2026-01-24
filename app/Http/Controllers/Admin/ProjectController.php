@@ -25,7 +25,9 @@ class ProjectController extends Controller
 
         $projectsQuery = Project::query();
 
-        if (! $user->isSuperAdmin()) {
+        if ($user->isEntryUser()) {
+            $projectsQuery->where('created_by', $user->id);
+        } elseif (! $user->isSuperAdmin()) {
             $projectsQuery->whereIn('id', $user->projects()->pluck('projects.id'));
         }
 
@@ -83,6 +85,10 @@ class ProjectController extends Controller
             $validated['logo_path'] = '/storage/'.$path;
         }
 
+        if ($user->isEntryUser()) {
+            $validated['created_by'] = $user->id;
+        }
+
         $project = Project::create($validated);
 
         if ($user->isProjectManager()) {
@@ -104,7 +110,11 @@ class ProjectController extends Controller
     {
         $user = $request->user();
 
-        if (! $user->isSuperAdmin() && ! $user->projects()->where('projects.id', $project->id)->exists()) {
+        if ($user->isEntryUser()) {
+            if ($project->created_by !== $user->id) {
+                abort(403);
+            }
+        } elseif (! $user->isSuperAdmin() && ! $user->projects()->where('projects.id', $project->id)->exists()) {
             abort(403);
         }
 
@@ -118,6 +128,9 @@ class ProjectController extends Controller
     public function print(Request $request, Project $project): Response
     {
         $user = $request->user();
+        if ($user->isEntryUser()) {
+            abort(403, 'Entry users cannot print projects.');
+        }
 
         if (! $user->isSuperAdmin() && ! $user->projects()->where('projects.id', $project->id)->exists()) {
             abort(403);
@@ -134,7 +147,11 @@ class ProjectController extends Controller
     {
         $user = $request->user();
 
-        if (! $user->isSuperAdmin() && ! $user->projects()->where('projects.id', $project->id)->exists()) {
+        if ($user->isEntryUser()) {
+            if ($project->created_by !== $user->id) {
+                abort(403);
+            }
+        } elseif (! $user->isSuperAdmin() && ! $user->projects()->where('projects.id', $project->id)->exists()) {
             abort(403);
         }
 
@@ -147,7 +164,11 @@ class ProjectController extends Controller
     {
         $user = $request->user();
 
-        if (! $user->isSuperAdmin() && ! $user->projects()->where('projects.id', $project->id)->exists()) {
+        if ($user->isEntryUser()) {
+            if ($project->created_by !== $user->id) {
+                abort(403);
+            }
+        } elseif (! $user->isSuperAdmin() && ! $user->projects()->where('projects.id', $project->id)->exists()) {
             abort(403);
         }
 
@@ -182,7 +203,11 @@ class ProjectController extends Controller
     {
         $user = $request->user();
 
-        if (! $user->isSuperAdmin() && ! $user->projects()->where('projects.id', $project->id)->exists()) {
+        if ($user->isEntryUser()) {
+            if ($project->created_by !== $user->id) {
+                abort(403);
+            }
+        } elseif (! $user->isSuperAdmin() && ! $user->projects()->where('projects.id', $project->id)->exists()) {
             abort(403);
         }
 
@@ -290,6 +315,9 @@ class ProjectController extends Controller
     public function importEmployees(Request $request, Project $project): RedirectResponse
     {
         $user = $request->user();
+        if ($user->isEntryUser()) {
+            abort(403, 'Entry users cannot import employees to projects.');
+        }
 
         if (! $user->isSuperAdmin() && ! $user->projects()->where('projects.id', $project->id)->exists()) {
             abort(403);
@@ -388,6 +416,9 @@ class ProjectController extends Controller
     public function importItems(Request $request, Project $project): RedirectResponse
     {
         $user = $request->user();
+        if ($user->isEntryUser()) {
+            abort(403, 'Entry users cannot import items to projects.');
+        }
 
         if (! $user->isSuperAdmin() && ! $user->projects()->where('projects.id', $project->id)->exists()) {
             abort(403);
@@ -560,6 +591,9 @@ class ProjectController extends Controller
     public function attachItem(Request $request, Project $project): RedirectResponse
     {
         $user = $request->user();
+        if ($user->isEntryUser()) {
+            abort(403, 'Entry users cannot attach items to projects.');
+        }
 
         if (! $user->isSuperAdmin() && ! $user->projects()->where('projects.id', $project->id)->exists()) {
             abort(403);
@@ -612,6 +646,9 @@ class ProjectController extends Controller
     public function detachItem(Request $request, Project $project): RedirectResponse
     {
         $user = $request->user();
+        if ($user->isEntryUser()) {
+            abort(403, 'Entry users cannot detach items from projects.');
+        }
 
         if (! $user->isSuperAdmin() && ! $user->projects()->where('projects.id', $project->id)->exists()) {
             abort(403);
@@ -643,6 +680,9 @@ class ProjectController extends Controller
     public function assignItemToEmployees(Request $request, Project $project): RedirectResponse
     {
         $user = $request->user();
+        if ($user->isEntryUser()) {
+            abort(403, 'Entry users cannot assign items to employees in projects.');
+        }
 
         if (! $user->isSuperAdmin() && ! $user->projects()->where('projects.id', $project->id)->exists()) {
             abort(403);
@@ -722,6 +762,9 @@ class ProjectController extends Controller
     public function importItemAssignments(Request $request, Project $project): RedirectResponse
     {
         $user = $request->user();
+        if ($user->isEntryUser()) {
+            abort(403, 'Entry users cannot import item assignments.');
+        }
 
         if (! $user->isSuperAdmin() && ! $user->projects()->where('projects.id', $project->id)->exists()) {
             abort(403);
@@ -809,6 +852,9 @@ class ProjectController extends Controller
     public function exportItemAssignments(Request $request, Project $project): StreamedResponse
     {
         $user = $request->user();
+        if ($user->isEntryUser()) {
+            abort(403, 'Entry users cannot export item assignments.');
+        }
 
         if (! $user->isSuperAdmin() && ! $user->projects()->where('projects.id', $project->id)->exists()) {
             abort(403);
@@ -857,6 +903,9 @@ class ProjectController extends Controller
     public function printItemAssignments(Request $request, Project $project): Response
     {
         $user = $request->user();
+        if ($user->isEntryUser()) {
+            abort(403, 'Entry users cannot print item assignments.');
+        }
 
         if (! $user->isSuperAdmin() && ! $user->projects()->where('projects.id', $project->id)->exists()) {
             abort(403);

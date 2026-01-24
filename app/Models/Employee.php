@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Employee extends Model
@@ -13,6 +14,7 @@ class Employee extends Model
     protected $fillable = [
         'employee_code',
         'name',
+        'created_by',
         'location',
         'position',
         'email',
@@ -20,6 +22,11 @@ class Employee extends Model
         'address',
         'image_path',
     ];
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 
     public function projects(): BelongsToMany
     {

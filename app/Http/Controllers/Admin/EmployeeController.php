@@ -20,14 +20,9 @@ class EmployeeController extends Controller
         $user = $request->user();
 
         $employeesQuery = Employee::query();
-
-        // Remove project restriction - project managers can see all employees
-        // if (! $user->isSuperAdmin()) {
-        //     $projectIds = $user->projects()->pluck('projects.id');
-        //     $employeesQuery->whereHas('projects', function ($q) use ($projectIds) {
-        //         $q->whereIn('projects.id', $projectIds);
-        //     });
-        // }
+        if ($user->isEntryUser()) {
+            $employeesQuery->where('created_by', $user->id);
+        }
 
         if ($search = $request->string('search')->trim()) {
             $employeesQuery->where(function ($q) use ($search) {
@@ -47,10 +42,11 @@ class EmployeeController extends Controller
 
         // Get all available items (not already assigned to any employee)
         $assignedItemIds = ItemEmployeeAssignment::pluck('item_id')->toArray();
-        $availableItems = Item::whereNotIn('id', $assignedItemIds)
-            ->with('category', 'status')
-            ->orderBy('name')
-            ->get(['id', 'tag_number', 'name', 'item_category_id', 'item_status_id']);
+        $availableItemsQuery = Item::whereNotIn('id', $assignedItemIds)->with('category', 'status')->orderBy('name');
+        if ($user->isEntryUser()) {
+            $availableItemsQuery->where('created_by', $user->id);
+        }
+        $availableItems = $availableItemsQuery->get(['id', 'tag_number', 'name', 'item_category_id', 'item_status_id']);
 
         return Inertia::render('Employees/Index', [
             'employees' => $employees,
@@ -99,6 +95,10 @@ class EmployeeController extends Controller
             $validated['image_path'] = '/storage/'.$path;
         }
 
+        if ($user->isEntryUser()) {
+            $validated['created_by'] = $user->id;
+        }
+
         $employee = Employee::create($validated);
 
         Activity::create([
@@ -114,18 +114,24 @@ class EmployeeController extends Controller
 
     public function show(Request $request, Employee $employee): Response
     {
+        $user = $request->user();
+        if ($user->isEntryUser() && $employee->created_by !== $user->id) {
+            abort(403);
+        }
+
         $employee->load(['projects', 'itemEmployeeAssignments.item.category', 'itemEmployeeAssignments.item.status']);
-        
+
         // Get all available items (not already assigned to any employee)
         // Items that are not assigned OR items that are assigned to this employee
         $assignedItemIds = ItemEmployeeAssignment::where('employee_id', '!=', $employee->id)
             ->pluck('item_id')
             ->toArray();
-        
-        $availableItems = Item::whereNotIn('id', $assignedItemIds)
-            ->with('category', 'status')
-            ->orderBy('name')
-            ->get(['id', 'tag_number', 'name', 'item_category_id', 'item_status_id']);
+
+        $availableItemsQuery = Item::whereNotIn('id', $assignedItemIds)->with('category', 'status')->orderBy('name');
+        if ($user->isEntryUser()) {
+            $availableItemsQuery->where('created_by', $user->id);
+        }
+        $availableItems = $availableItemsQuery->get(['id', 'tag_number', 'name', 'item_category_id', 'item_status_id']);
 
         return Inertia::render('Employees/Show', [
             'employee' => $employee,
@@ -135,6 +141,11 @@ class EmployeeController extends Controller
 
     public function print(Request $request, Employee $employee): Response
     {
+        $user = $request->user();
+        if ($user->isEntryUser()) {
+            abort(403, 'Entry users cannot print employee cards.');
+        }
+
         $employee->load(['itemEmployeeAssignments.item.category', 'itemEmployeeAssignments.item.status', 'itemEmployeeAssignments.item.currency']);
 
         return Inertia::render('Employees/Print', [
@@ -144,6 +155,11 @@ class EmployeeController extends Controller
 
     public function edit(Request $request, Employee $employee): Response
     {
+        $user = $request->user();
+        if ($user->isEntryUser() && $employee->created_by !== $user->id) {
+            abort(403);
+        }
+
         return Inertia::render('Employees/Edit', [
             'employee' => $employee,
         ]);
@@ -152,6 +168,9 @@ class EmployeeController extends Controller
     public function update(Request $request, Employee $employee): RedirectResponse
     {
         $user = $request->user();
+        if ($user->isEntryUser() && $employee->created_by !== $user->id) {
+            abort(403);
+        }
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -185,8 +204,11 @@ class EmployeeController extends Controller
     {
         $user = $request->user();
 
-        // Only super admins can delete employees
-        if (! $user->isSuperAdmin()) {
+        if ($user->isEntryUser()) {
+            if ($employee->created_by !== $user->id) {
+                abort(403);
+            }
+        } elseif (! $user->isSuperAdmin()) {
             abort(403, 'Only super administrators can delete employees.');
         }
 
@@ -207,6 +229,9 @@ class EmployeeController extends Controller
     public function assignItem(Request $request, Employee $employee): RedirectResponse
     {
         $user = $request->user();
+        if ($user->isEntryUser()) {
+            abort(403, 'Entry users cannot assign items to employees.');
+        }
 
         $validated = $request->validate([
             'item_ids' => ['required', 'array', 'min:1'],
@@ -256,6 +281,9 @@ class EmployeeController extends Controller
     public function unassignItem(Request $request, Employee $employee, ItemEmployeeAssignment $assignment): RedirectResponse
     {
         $user = $request->user();
+        if ($user->isEntryUser()) {
+            abort(403, 'Entry users cannot unassign items.');
+        }
 
         // Verify the assignment belongs to this employee
         if ($assignment->employee_id !== $employee->id) {
@@ -279,6 +307,9 @@ class EmployeeController extends Controller
     public function import(Request $request): RedirectResponse
     {
         $user = $request->user();
+        if ($user->isEntryUser()) {
+            abort(403, 'Entry users cannot import employees.');
+        }
 
         $validated = $request->validate([
             'file' => ['required', 'file', 'mimes:csv,xlsx,xls'],
@@ -396,6 +427,9 @@ class EmployeeController extends Controller
     public function bulkDelete(Request $request): RedirectResponse
     {
         $user = $request->user();
+        if ($user->isEntryUser()) {
+            abort(403, 'Entry users cannot bulk delete employees.');
+        }
 
         // Only super admins can delete employees
         if (! $user->isSuperAdmin()) {

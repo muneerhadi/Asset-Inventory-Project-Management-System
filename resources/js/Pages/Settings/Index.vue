@@ -1,14 +1,16 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 const props = defineProps({
     categories: Array,
     statuses: Array,
     currencies: Array,
     projectManagers: Array,
+    entryUsers: Array,
     projects: Array,
+    entryUsersCanAddCategories: Boolean,
 });
 
 const categoryForm = useForm({
@@ -45,7 +47,20 @@ const managerForm = useForm({
     project_ids: [],
 });
 
+const entryUserForm = useForm({
+    name: '',
+    email: '',
+    password: '',
+});
+
+const entryUsersCanAddCategories = ref(props.entryUsersCanAddCategories ?? false);
+const savingCategories = ref(false);
+
 const editingManagerProjects = ref(null);
+const deletingEntryUser = ref(null);
+const deleteEntryUserStep = ref(1);
+const deleteEntryUserPassword = ref('');
+const deleteEntryUserError = ref('');
 const editingProjects = ref([]);
 const deletingManager = ref(null);
 const deleteStep = ref(1);
@@ -151,6 +166,59 @@ const toggleEditingProject = (projectId) => {
         editingProjects.value.push(projectId);
     }
 };
+
+const submitEntryUser = () => {
+    entryUserForm.post(route('settings.entry-users.store'), {
+        onSuccess: () => entryUserForm.reset(),
+    });
+};
+
+const openDeleteEntryUser = (user) => {
+    deletingEntryUser.value = user;
+    deleteEntryUserStep.value = 1;
+    deleteEntryUserPassword.value = '';
+    deleteEntryUserError.value = '';
+};
+
+const cancelDeleteEntryUser = () => {
+    deletingEntryUser.value = null;
+    deleteEntryUserStep.value = 1;
+    deleteEntryUserPassword.value = '';
+    deleteEntryUserError.value = '';
+};
+
+const nextEntryUserDeleteStep = () => {
+    if (deleteEntryUserStep.value < 3) deleteEntryUserStep.value++;
+};
+
+const prevEntryUserDeleteStep = () => {
+    if (deleteEntryUserStep.value > 1) deleteEntryUserStep.value--;
+};
+
+const confirmDeleteEntryUser = () => {
+    if (!deletingEntryUser.value || !deleteEntryUserPassword.value) return;
+    router.delete(route('settings.entry-users.destroy', deletingEntryUser.value.id), {
+        data: { password: deleteEntryUserPassword.value },
+        onError: (errors) => {
+            deleteEntryUserError.value = errors.password || 'An error occurred';
+        },
+        onSuccess: () => cancelDeleteEntryUser(),
+    });
+};
+
+const submitEntryUserCategories = () => {
+    savingCategories.value = true;
+    router.patch(route('settings.entry-user-categories.update'), {
+        entry_users_can_add_categories: entryUsersCanAddCategories.value,
+    }, {
+        preserveScroll: true,
+        onFinish: () => { savingCategories.value = false; },
+    });
+};
+
+watch(() => props.entryUsersCanAddCategories, (v) => {
+    entryUsersCanAddCategories.value = v ?? false;
+}, { immediate: true });
 </script>
 
 <template>
@@ -462,6 +530,116 @@ const toggleEditingProject = (projectId) => {
                             </div>
                         </div>
                     </section>
+
+                    <!-- Entry Users Section -->
+                    <section class="rounded-xl border border-teal-200/60 bg-gradient-to-br from-teal-50/80 via-white to-cyan-50/80 p-6 shadow-md mt-8 dark:border-teal-900/40 dark:bg-gradient-to-br dark:from-teal-950/40 dark:via-slate-900 dark:to-cyan-950/30">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-slate-50 mb-4">
+                            <i class="fa-solid fa-user-pen mr-2 text-teal-600 dark:text-teal-400"></i>
+                            Entry Users
+                        </h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                            Entry users can access Inventory, Employees, and Owners only. They can add, edit, and delete only their own created items, employees, and owners. They have a profile page to change name, email, and password.
+                        </p>
+
+                        <!-- Entry user setting: categories -->
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-lg p-4 mb-6">
+                            <h4 class="text-sm font-semibold text-gray-900 dark:text-slate-50 mb-3">Entry user settings</h4>
+                            <label class="inline-flex items-center gap-2 cursor-pointer">
+                                <input
+                                    v-model="entryUsersCanAddCategories"
+                                    type="checkbox"
+                                    class="rounded border-gray-300 text-teal-600 dark:border-slate-600 dark:bg-slate-700"
+                                />
+                                <span class="text-sm text-gray-700 dark:text-slate-300">Entry users can add new item categories</span>
+                            </label>
+                            <div class="mt-3">
+                                <button
+                                    type="button"
+                                    class="inline-flex items-center gap-2 rounded-md bg-teal-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-teal-700 disabled:opacity-50 dark:bg-teal-500 dark:hover:bg-teal-600"
+                                    :disabled="savingCategories"
+                                    @click="submitEntryUserCategories"
+                                >
+                                    <i v-if="savingCategories" class="fa-solid fa-spinner fa-spin"></i>
+                                    <i v-else class="fa-solid fa-check"></i>
+                                    {{ savingCategories ? 'Saving…' : 'Save setting' }}
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Create Entry User Form -->
+                        <div class="bg-white/50 dark:bg-slate-800/50 rounded-lg p-4 mb-6">
+                            <h4 class="text-sm font-semibold text-gray-900 dark:text-slate-50 mb-3">Create New Entry User</h4>
+                            <form class="grid gap-4 md:grid-cols-3" @submit.prevent="submitEntryUser">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300">Name *</label>
+                                    <input
+                                        v-model="entryUserForm.name"
+                                        type="text"
+                                        class="mt-1 block w-full rounded-md border-gray-300 bg-white text-sm text-gray-900 shadow-sm focus:border-teal-500 focus:ring-teal-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50"
+                                        required
+                                    />
+                                    <p v-if="entryUserForm.errors.name" class="mt-1 text-xs text-red-600">{{ entryUserForm.errors.name }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300">Email *</label>
+                                    <input
+                                        v-model="entryUserForm.email"
+                                        type="email"
+                                        class="mt-1 block w-full rounded-md border-gray-300 bg-white text-sm text-gray-900 shadow-sm focus:border-teal-500 focus:ring-teal-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50"
+                                        required
+                                    />
+                                    <p v-if="entryUserForm.errors.email" class="mt-1 text-xs text-red-600">{{ entryUserForm.errors.email }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 dark:text-slate-300">Password *</label>
+                                    <input
+                                        v-model="entryUserForm.password"
+                                        type="password"
+                                        class="mt-1 block w-full rounded-md border-gray-300 bg-white text-sm text-gray-900 shadow-sm focus:border-teal-500 focus:ring-teal-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50"
+                                        required
+                                    />
+                                    <p v-if="entryUserForm.errors.password" class="mt-1 text-xs text-red-600">{{ entryUserForm.errors.password }}</p>
+                                </div>
+                                <div class="md:col-span-3 flex justify-end">
+                                    <button
+                                        type="submit"
+                                        class="inline-flex items-center gap-2 rounded-md bg-teal-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-teal-500 dark:hover:bg-teal-400"
+                                        :disabled="entryUserForm.processing"
+                                    >
+                                        <i class="fa-solid fa-user-plus text-xs"></i>
+                                        <span>Create Entry User</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Existing Entry Users -->
+                        <div class="space-y-3">
+                            <h4 class="text-sm font-semibold text-gray-900 dark:text-slate-50">Existing Entry Users</h4>
+                            <div v-if="entryUsers && entryUsers.length" class="grid gap-3 md:grid-cols-2">
+                                <div
+                                    v-for="user in entryUsers"
+                                    :key="user.id"
+                                    class="bg-white/70 dark:bg-slate-800/70 rounded-lg p-4 border border-gray-200 dark:border-slate-700 flex items-center justify-between"
+                                >
+                                    <div>
+                                        <h5 class="font-medium text-gray-900 dark:text-slate-50">{{ user.name }}</h5>
+                                        <p class="text-xs text-gray-600 dark:text-slate-400">{{ user.email }}</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-800/40"
+                                        @click="openDeleteEntryUser(user)"
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                            <div v-else class="text-sm text-gray-500 dark:text-slate-400 text-center py-4">
+                                No entry users created yet.
+                            </div>
+                        </div>
+                    </section>
                 </div>
             </div>
         </div>
@@ -619,6 +797,88 @@ const toggleEditingProject = (projectId) => {
                     >
                         <i class="fa-solid fa-check"></i>
                         Update Projects
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Entry User Modal -->
+        <div v-if="deletingEntryUser" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 dark:bg-black/70">
+            <div class="w-full max-w-md space-y-4 rounded-xl bg-white shadow-xl dark:bg-slate-900">
+                <div class="border-b border-slate-200 bg-gradient-to-r from-red-50 to-rose-50 px-6 py-4 dark:border-slate-700 dark:from-slate-800 dark:to-slate-900">
+                    <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-50">
+                        <i class="fa-solid fa-user-xmark mr-2 text-red-600 dark:text-red-400"></i>
+                        Delete Entry User
+                    </h3>
+                    <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">Step {{ deleteEntryUserStep }} of 3</p>
+                </div>
+                <div v-if="deleteEntryUserStep === 1" class="space-y-4 px-6 py-4">
+                    <div class="text-center">
+                        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+                            <i class="fa-solid fa-exclamation-triangle text-red-600 dark:text-red-400"></i>
+                        </div>
+                        <h4 class="mt-3 text-lg font-medium text-slate-900 dark:text-slate-50">Are you sure?</h4>
+                        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                            You are about to delete <strong>{{ deletingEntryUser.name }}</strong>.
+                        </p>
+                    </div>
+                </div>
+                <div v-if="deleteEntryUserStep === 2" class="space-y-4 px-6 py-4">
+                    <div class="text-center">
+                        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+                            <i class="fa-solid fa-user-xmark text-red-600 dark:text-red-400"></i>
+                        </div>
+                        <h4 class="mt-3 text-lg font-medium text-slate-900 dark:text-slate-50">This action cannot be undone</h4>
+                        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">The entry user account will be permanently deleted.</p>
+                    </div>
+                </div>
+                <div v-if="deleteEntryUserStep === 3" class="space-y-4 px-6 py-4">
+                    <div class="text-center">
+                        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+                            <i class="fa-solid fa-lock text-red-600 dark:text-red-400"></i>
+                        </div>
+                        <h4 class="mt-3 text-lg font-medium text-slate-900 dark:text-slate-50">Enter your password</h4>
+                        <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Please confirm your admin password to proceed.</p>
+                    </div>
+                    <div>
+                        <input
+                            v-model="deleteEntryUserPassword"
+                            type="password"
+                            placeholder="Your admin password"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-red-500 focus:ring-red-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-50"
+                            @keyup.enter="confirmDeleteEntryUser"
+                        />
+                        <p v-if="deleteEntryUserError" class="mt-1 text-xs text-red-600">{{ deleteEntryUserError }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-700 dark:bg-slate-800/50">
+                    <button
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600"
+                        @click="deleteEntryUserStep === 1 ? cancelDeleteEntryUser() : prevEntryUserDeleteStep()"
+                    >
+                        <i class="fa-solid fa-arrow-left" v-if="deleteEntryUserStep > 1"></i>
+                        <i class="fa-solid fa-xmark" v-else></i>
+                        {{ deleteEntryUserStep === 1 ? 'Cancel' : 'Back' }}
+                    </button>
+                    <button
+                        v-if="deleteEntryUserStep < 3"
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-6 py-2.5 text-sm font-medium text-white shadow-md transition hover:bg-red-700"
+                        @click="nextEntryUserDeleteStep"
+                    >
+                        Continue
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                    <button
+                        v-else
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-6 py-2.5 text-sm font-medium text-white shadow-md transition hover:bg-red-700 disabled:opacity-50"
+                        :disabled="!deleteEntryUserPassword"
+                        @click="confirmDeleteEntryUser"
+                    >
+                        <i class="fa-solid fa-trash"></i>
+                        Delete Entry User
                     </button>
                 </div>
             </div>

@@ -137,17 +137,26 @@ const toggleTheme = () => {
                     >
                         {{ $page.props.auth.user.role === 'project_manager' ? 'My Projects' : 'Owners' }}
                     </ResponsiveNavLink>
+                    <template v-if="$page.props.auth.user.role !== 'entry_user'">
+                        <ResponsiveNavLink
+                            :href="route('reports.index')"
+                            :active="route().current('reports.*')"
+                        >
+                            Reports
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('search.items')"
+                            :active="route().current('search.*')"
+                        >
+                            Search
+                        </ResponsiveNavLink>
+                    </template>
                     <ResponsiveNavLink
-                        :href="route('reports.index')"
-                        :active="route().current('reports.*')"
+                        v-if="$page.props.auth.user.role === 'entry_user' && $page.props.entry_users_can_add_categories"
+                        :href="route('entry.categories.index')"
+                        :active="route().current('entry.categories.*')"
                     >
-                        Reports
-                    </ResponsiveNavLink>
-                    <ResponsiveNavLink
-                        :href="route('search.items')"
-                        :active="route().current('search.*')"
-                    >
-                        Search
+                        Item Categories
                     </ResponsiveNavLink>
                 </nav>
             </aside>
@@ -333,20 +342,28 @@ const toggleTheme = () => {
                         >
                             {{ $page.props.auth.user.role === 'project_manager' ? 'My Projects' : 'Owners' }}
                         </ResponsiveNavLink>
+                        <template v-if="$page.props.auth.user.role !== 'entry_user'">
+                            <ResponsiveNavLink
+                                :href="route('reports.index')"
+                                :active="route().current('reports.*')"
+                            >
+                                Reports
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink
+                                :href="route('search.items')"
+                                :active="route().current('search.*')"
+                            >
+                                Search
+                            </ResponsiveNavLink>
+                        </template>
                         <ResponsiveNavLink
-                            :href="route('reports.index')"
-                            :active="route().current('reports.*')"
+                            v-if="$page.props.auth.user.role === 'entry_user' && $page.props.entry_users_can_add_categories"
+                            :href="route('entry.categories.index')"
+                            :active="route().current('entry.categories.*')"
                         >
-                            Reports
-                        </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            :href="route('search.items')"
-                            :active="route().current('search.*')"
-                        >
-                            Search
+                            Item Categories
                         </ResponsiveNavLink>
                     </div>
-
                     <div class="mt-3 border-t border-slate-200 pt-3 dark:border-slate-800">
                         <div class="text-xs font-medium text-slate-700 dark:text-slate-200">
                             {{ $page.props.auth.user.name }}

@@ -70,4 +70,9 @@ class User extends Authenticatable
     {
         return $this->role === 'project_manager';
     }
+
+    public function isEntryUser(): bool
+    {
+        return $this->role === 'entry_user';
+    }
 }

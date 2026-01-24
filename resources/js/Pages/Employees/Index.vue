@@ -20,6 +20,7 @@ const showAssignModal = ref(false);
 const showDeleteModal = ref(false);
 const employeeToDelete = ref(null);
 const showImportModal = ref(false);
+const showImportOption = false; /* hidden for now */
 const importFile = ref(null);
 const isImporting = ref(false);
 const selectedEmployees = ref([]);
@@ -194,6 +195,7 @@ const filteredItems = computed(() => {
                 </div>
                 <div class="flex gap-2">
                     <button
+                        v-if="showImportOption"
                         type="button"
                         @click="openImportModal"
                         class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-green-700 dark:to-emerald-800"

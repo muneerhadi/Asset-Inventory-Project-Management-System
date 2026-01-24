@@ -26,7 +26,9 @@ class ItemController extends Controller
         // Base query used for stats (affected by project and search, but not by status filter)
         $baseQuery = Item::with(['category', 'status', 'currency', 'project', 'itemEmployeeAssignments']);
 
-        if (! $user->isSuperAdmin()) {
+        if ($user->isEntryUser()) {
+            $baseQuery->where('created_by', $user->id);
+        } elseif (! $user->isSuperAdmin()) {
             $projectIds = $user->projects()->pluck('projects.id');
             $baseQuery->whereIn('project_id', $projectIds);
         }
@@ -83,9 +85,13 @@ class ItemController extends Controller
     public function create(Request $request): Response
     {
         $user = $request->user();
-        $projectOptions = $user->isSuperAdmin()
-            ? Project::orderBy('name')->get(['id', 'name'])
-            : $user->projects()->orderBy('name')->get(['projects.id', 'projects.name']);
+        if ($user->isEntryUser()) {
+            $projectOptions = Project::where('created_by', $user->id)->orderBy('name')->get(['id', 'name']);
+        } elseif ($user->isSuperAdmin()) {
+            $projectOptions = Project::orderBy('name')->get(['id', 'name']);
+        } else {
+            $projectOptions = $user->projects()->orderBy('name')->get(['projects.id', 'projects.name']);
+        }
 
         return Inertia::render('Items/Create', [
             'categories' => ItemCategory::where('is_active', true)->orderBy('name')->get(),
@@ -162,8 +168,15 @@ class ItemController extends Controller
             $validated['images'] = [$validated['image_path']];
         }
 
-        if (! $user->isSuperAdmin() && isset($validated['project_id'])) {
-            // Ensure project managers can only assign to their projects
+        if ($user->isEntryUser()) {
+            if (isset($validated['project_id'])) {
+                $ok = Project::where('id', $validated['project_id'])->where('created_by', $user->id)->exists();
+                if (! $ok) {
+                    abort(403);
+                }
+            }
+            $validated['created_by'] = $user->id;
+        } elseif (! $user->isSuperAdmin() && isset($validated['project_id'])) {
             $allowedProjectIds = $user->projects()->pluck('projects.id');
             if (! $allowedProjectIds->contains($validated['project_id'])) {
                 abort(403);
@@ -187,7 +200,11 @@ class ItemController extends Controller
     {
         $user = $request->user();
 
-        if (! $user->isSuperAdmin()) {
+        if ($user->isEntryUser()) {
+            if ($item->created_by !== $user->id) {
+                abort(403);
+            }
+        } elseif (! $user->isSuperAdmin()) {
             $projectIds = $user->projects()->pluck('projects.id');
             if ($item->project_id && ! $projectIds->contains($item->project_id)) {
                 abort(403);
@@ -205,16 +222,20 @@ class ItemController extends Controller
     {
         $user = $request->user();
 
-        if (! $user->isSuperAdmin()) {
+        if ($user->isEntryUser()) {
+            if ($item->created_by !== $user->id) {
+                abort(403);
+            }
+            $projectOptions = Project::where('created_by', $user->id)->orderBy('name')->get(['id', 'name']);
+        } elseif (! $user->isSuperAdmin()) {
             $projectIds = $user->projects()->pluck('projects.id');
             if ($item->project_id && ! $projectIds->contains($item->project_id)) {
                 abort(403);
             }
+            $projectOptions = $user->projects()->orderBy('name')->get(['projects.id', 'projects.name']);
+        } else {
+            $projectOptions = Project::orderBy('name')->get(['id', 'name']);
         }
-
-        $projectOptions = $user->isSuperAdmin()
-            ? Project::orderBy('name')->get(['id', 'name'])
-            : $user->projects()->orderBy('name')->get(['projects.id', 'projects.name']);
 
         return Inertia::render('Items/Edit', [
             'item' => $item->load(['category', 'status', 'currency', 'project']),
@@ -229,7 +250,11 @@ class ItemController extends Controller
     {
         $user = $request->user();
 
-        if (! $user->isSuperAdmin()) {
+        if ($user->isEntryUser()) {
+            if ($item->created_by !== $user->id) {
+                abort(403);
+            }
+        } elseif (! $user->isSuperAdmin()) {
             $projectIds = $user->projects()->pluck('projects.id');
             if ($item->project_id && ! $projectIds->contains($item->project_id)) {
                 abort(403);
@@ -310,7 +335,12 @@ class ItemController extends Controller
             }
         }
 
-        if (! $user->isSuperAdmin() && isset($validated['project_id'])) {
+        if ($user->isEntryUser() && isset($validated['project_id'])) {
+            $ok = Project::where('id', $validated['project_id'])->where('created_by', $user->id)->exists();
+            if (! $ok) {
+                abort(403);
+            }
+        } elseif (! $user->isSuperAdmin() && isset($validated['project_id'])) {
             $allowedProjectIds = $user->projects()->pluck('projects.id');
             if (! $allowedProjectIds->contains($validated['project_id'])) {
                 abort(403);
@@ -334,7 +364,11 @@ class ItemController extends Controller
     {
         $user = $request->user();
 
-        if (! $user->isSuperAdmin()) {
+        if ($user->isEntryUser()) {
+            if ($item->created_by !== $user->id) {
+                abort(403);
+            }
+        } elseif (! $user->isSuperAdmin()) {
             $projectIds = $user->projects()->pluck('projects.id');
             if ($item->project_id && ! $projectIds->contains($item->project_id)) {
                 abort(403);
@@ -358,6 +392,9 @@ class ItemController extends Controller
     public function import(Request $request): RedirectResponse
     {
         $user = $request->user();
+        if ($user->isEntryUser()) {
+            abort(403, 'Entry users cannot import items.');
+        }
 
         $validated = $request->validate([
             'file' => ['required', 'file', 'mimes:csv,xlsx,xls'],
@@ -625,6 +662,9 @@ class ItemController extends Controller
     public function inStock(Request $request): Response
     {
         $user = $request->user();
+        if ($user->isEntryUser()) {
+            abort(403, 'Entry users cannot access in-stock view.');
+        }
 
         $itemsQuery = Item::with(['category', 'status', 'currency', 'project', 'itemEmployeeAssignments'])
             ->whereDoesntHave('itemEmployeeAssignments');
@@ -643,6 +683,10 @@ class ItemController extends Controller
 
     public function bulkDelete(Request $request): RedirectResponse
     {
+        if ($request->user()->isEntryUser()) {
+            abort(403, 'Entry users cannot bulk delete items.');
+        }
+
         $validated = $request->validate([
             'item_ids' => ['required', 'array'],
             'item_ids.*' => ['exists:items,id'],

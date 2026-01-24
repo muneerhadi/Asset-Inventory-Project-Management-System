@@ -28,6 +28,7 @@ class Item extends Model
         'model',
         'serial_number',
         'project_id',
+        'created_by',
         'remarks',
         'image_path',
         'images',
@@ -59,6 +60,11 @@ class Item extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function itemEmployeeAssignments()

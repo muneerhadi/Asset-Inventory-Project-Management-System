@@ -8,6 +8,7 @@ const props = defineProps({
 });
 
 const selectedProjectIds = ref([]);
+const showProjectInventoryReport = false; /* hidden for now */
 
 const openProjectReport = () => {
     if (selectedProjectIds.value.length === 0) return;
@@ -71,7 +72,10 @@ const toggleAllProjects = () => {
                         </Link>
                     </section>
 
-                    <section class="overflow-hidden rounded-xl border border-purple-200/50 bg-gradient-to-br from-purple-100/60 via-pink-50/40 to-violet-100/50 p-4 shadow-md transition hover:shadow-lg dark:border-purple-900/30 dark:bg-gradient-to-br dark:from-purple-950/40 dark:via-slate-900/60 dark:to-violet-950/40">
+                    <section
+                        v-if="showProjectInventoryReport"
+                        class="overflow-hidden rounded-xl border border-purple-200/50 bg-gradient-to-br from-purple-100/60 via-pink-50/40 to-violet-100/50 p-4 shadow-md transition hover:shadow-lg dark:border-purple-900/30 dark:bg-gradient-to-br dark:from-purple-950/40 dark:via-slate-900/60 dark:to-violet-950/40"
+                    >
                         <div class="flex items-start justify-between">
                             <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-50">Project inventory</h3>
                             <span class="text-purple-600 dark:text-purple-400">

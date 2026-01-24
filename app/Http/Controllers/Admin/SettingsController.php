@@ -7,6 +7,7 @@ use App\Models\Currency;
 use App\Models\ItemCategory;
 use App\Models\ItemStatus;
 use App\Models\Project;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -26,7 +27,9 @@ class SettingsController extends Controller
                 ->with('projects:id,code,name')
                 ->orderBy('name')
                 ->get(['id', 'name', 'email', 'role']),
+            'entryUsers' => User::where('role', 'entry_user')->orderBy('name')->get(['id', 'name', 'email', 'role']),
             'projects' => Project::orderBy('name')->get(['id', 'code', 'name']),
+            'entryUsersCanAddCategories' => Setting::getBool('entry_users_can_add_categories', false),
         ]);
     }
 
@@ -167,5 +170,86 @@ class SettingsController extends Controller
         $user->delete();
 
         return redirect()->route('settings.index')->with('success', 'Project manager deleted.');
+    }
+
+    public function storeEntryUser(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8'],
+        ]);
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        $user->role = 'entry_user';
+        $user->save();
+
+        return redirect()->route('settings.index')->with('success', 'Entry user created.');
+    }
+
+    public function destroyEntryUser(Request $request, User $user): RedirectResponse
+    {
+        abort_unless($user->isEntryUser(), 404);
+
+        $validated = $request->validate([
+            'password' => ['required', 'string'],
+        ]);
+
+        if (! Hash::check($validated['password'], auth()->user()->password)) {
+            return back()->withErrors(['password' => 'The provided password is incorrect.']);
+        }
+
+        $user->delete();
+
+        return redirect()->route('settings.index')->with('success', 'Entry user deleted.');
+    }
+
+    public function updateEntryUserCategoriesSetting(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'entry_users_can_add_categories' => ['required', 'boolean'],
+        ]);
+
+        Setting::set('entry_users_can_add_categories', $validated['entry_users_can_add_categories'] ? '1' : '0');
+
+        return redirect()->route('settings.index')->with('success', 'Entry user setting updated.');
+    }
+
+    public function entryCategories(Request $request): Response
+    {
+        $user = $request->user();
+        if (! $user->isEntryUser() || ! Setting::getBool('entry_users_can_add_categories', false)) {
+            abort(403, 'You cannot add item categories.');
+        }
+
+        return Inertia::render('Entry/Categories', [
+            'categories' => ItemCategory::orderBy('name')->get(),
+        ]);
+    }
+
+    public function storeEntryCategory(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+        if (! $user->isEntryUser() || ! Setting::getBool('entry_users_can_add_categories', false)) {
+            abort(403, 'You cannot add item categories.');
+        }
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255', 'unique:item_categories,name'],
+            'description' => ['nullable', 'string'],
+        ]);
+
+        ItemCategory::create([
+            'name' => $validated['name'],
+            'description' => $validated['description'] ?? null,
+            'is_active' => true,
+        ]);
+
+        return redirect()->route('entry.categories.index')->with('success', 'Category created.');
     }
 }

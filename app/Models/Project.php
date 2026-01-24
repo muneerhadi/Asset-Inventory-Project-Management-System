@@ -15,6 +15,7 @@ class Project extends Model
     protected $fillable = [
         'code',
         'name',
+        'created_by',
         'start_date',
         'end_date',
         'logo_path',
@@ -25,6 +26,11 @@ class Project extends Model
         'start_date' => 'date',
         'end_date' => 'date',
     ];
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 
     public function managers(): BelongsToMany
     {

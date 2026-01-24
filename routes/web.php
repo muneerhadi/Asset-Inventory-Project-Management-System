@@ -17,8 +17,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
 
-    // Shared between super admins and project managers, with data filtered in controllers
-    Route::middleware('role:super_admin,project_manager')->group(function () {
+    // Items, employees, projects: super_admin, project_manager, entry_user (entry_user has ownership restrictions in controllers)
+    Route::middleware('role:super_admin,project_manager,entry_user')->group(function () {
         Route::resource('items', ItemController::class);
         Route::post('items/import', [ItemController::class, 'import'])->name('items.import');
         Route::post('items/bulk-delete', [ItemController::class, 'bulkDelete'])->name('items.bulk-delete');
@@ -37,10 +37,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
         Route::get('projects/{project}/edit', [ProjectController::class, 'edit'])->name('projects.edit');
         Route::put('projects/{project}', [ProjectController::class, 'update'])->name('projects.update');
-        
-        // Project deletion (super admin only)
+        Route::delete('projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
+
         Route::middleware('role:super_admin')->group(function () {
-            Route::delete('projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
             Route::post('projects/verify-password', [ProjectController::class, 'verifyPassword'])
                 ->name('projects.verify-password');
         });
@@ -70,10 +69,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('projects/{project}/print-item-assignments', [ProjectController::class, 'printItemAssignments'])
             ->name('projects.print-item-assignments');
 
+        // Entry users: add categories when setting allows (separate route)
+        Route::get('entry/categories', [SettingsController::class, 'entryCategories'])->name('entry.categories.index');
+        Route::post('entry/categories', [SettingsController::class, 'storeEntryCategory'])->name('entry.categories.store');
+    });
+
+    // Reports, activities, search: super_admin and project_manager only (no entry_user)
+    Route::middleware('role:super_admin,project_manager')->group(function () {
         Route::get('activities', [ActivityController::class, 'index'])->name('activities.index');
         Route::get('activities/{activity}', [ActivityController::class, 'show'])->name('activities.show');
-
-        // Reports
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('reports/project/{project}', [ReportController::class, 'project'])
             ->name('reports.project');
@@ -85,8 +89,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('reports.custom');
         Route::get('reports/custom/print', [ReportController::class, 'printCustom'])
             ->name('reports.custom.print');
-
-        // Search
         Route::get('search/items', [SearchController::class, 'items'])
             ->name('search.items');
         Route::get('search/employees', [SearchController::class, 'employees'])
@@ -109,6 +111,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('settings/project-managers', [SettingsController::class, 'storeProjectManager'])->name('settings.project-managers.store');
         Route::post('settings/project-managers/{user}/projects', [SettingsController::class, 'updateProjectManagerProjects'])->name('settings.project-managers.projects.update');
         Route::delete('settings/project-managers/{user}', [SettingsController::class, 'destroyProjectManager'])->name('settings.project-managers.destroy');
+
+        Route::post('settings/entry-users', [SettingsController::class, 'storeEntryUser'])->name('settings.entry-users.store');
+        Route::delete('settings/entry-users/{user}', [SettingsController::class, 'destroyEntryUser'])->name('settings.entry-users.destroy');
+        Route::patch('settings/entry-user-categories', [SettingsController::class, 'updateEntryUserCategoriesSetting'])->name('settings.entry-user-categories.update');
     });
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
