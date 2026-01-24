@@ -1,10 +1,61 @@
 <script setup>
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { formatDate } from '@/utils/dateFormat';
 
 const props = defineProps({
-    activities: Object, 
+    activities: Object,
+});
+
+const isLoading = ref(true);
+const isMounted = ref(true);
+const hasEntered = ref(false);
+let loaderShownAt = 0;
+const MIN_LOADER_MS = 400;
+const INITIAL_LOADER_MS = 350;
+
+function showLoader() {
+    if (!isMounted.value) return;
+    isLoading.value = true;
+    loaderShownAt = Date.now();
+}
+
+function hideLoader() {
+    if (!isMounted.value) return;
+    const elapsed = Date.now() - loaderShownAt;
+    const wait = Math.max(0, MIN_LOADER_MS - elapsed);
+    setTimeout(() => {
+        if (isMounted.value) isLoading.value = false;
+    }, wait);
+}
+
+function goToPage(url) {
+    if (!url) return;
+    router.get(url, {}, { preserveState: true });
+}
+
+function goToActivity(id) {
+    router.get(route('activities.show', id));
+}
+
+onMounted(() => {
+    loaderShownAt = Date.now();
+    router.on('start', showLoader);
+    router.on('finish', hideLoader);
+    router.on('cancel', hideLoader);
+    router.on('error', hideLoader);
+    setTimeout(() => {
+        if (!isMounted.value) return;
+        isLoading.value = false;
+        requestAnimationFrame(() => {
+            hasEntered.value = true;
+        });
+    }, INITIAL_LOADER_MS);
+});
+
+onBeforeUnmount(() => {
+    isMounted.value = false;
 });
 </script>
 
@@ -33,8 +84,37 @@ const props = defineProps({
 
         <div class="space-y-4">
             <section
-                class="overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-b from-white via-slate-50 to-white p-4 shadow-sm dark:border-slate-800 dark:bg-gradient-to-b dark:from-slate-900 dark:via-slate-900/90 dark:to-slate-950"
+                :class="[
+                    'activity-section relative overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-b from-white via-slate-50 to-white p-4 shadow-sm dark:border-slate-800 dark:bg-gradient-to-b dark:from-slate-900 dark:via-slate-900/90 dark:to-slate-950',
+                    hasEntered && 'activity-section-visible'
+                ]"
             >
+                <!-- Loading overlay with loader -->
+                <Transition
+                    enter-active-class="transition duration-200 ease-out"
+                    enter-from-class="opacity-0"
+                    enter-to-class="opacity-100"
+                    leave-active-class="transition duration-150 ease-in"
+                    leave-from-class="opacity-100"
+                    leave-to-class="opacity-0"
+                >
+                    <div
+                        v-show="isLoading"
+                        class="activity-loader-overlay absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 rounded-xl bg-slate-900/60 backdrop-blur-sm dark:bg-slate-950/70"
+                        aria-hidden="true"
+                    >
+                        <div class="activity-loader" role="status" aria-label="Loading activity log">
+                            <div class="activity-loader-ring activity-loader-ring-1"></div>
+                            <div class="activity-loader-ring activity-loader-ring-2"></div>
+                            <div class="activity-loader-ring activity-loader-ring-3"></div>
+                            <div class="activity-loader-core">
+                                <i class="fa-solid fa-clock-rotate-left text-sky-400 text-xl"></i>
+                            </div>
+                        </div>
+                        <p class="text-sm font-medium text-white/90 tracking-wide">Loading activity log…</p>
+                    </div>
+                </Transition>
+
                 <div class="mb-3 flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <span
@@ -79,10 +159,14 @@ const props = defineProps({
                         </thead>
                         <tbody class="divide-y divide-slate-100 bg-white/90 dark:divide-slate-800 dark:bg-slate-900/80">
                             <tr
-                                v-for="activity in activities.data"
+                                v-for="(activity, idx) in activities.data"
                                 :key="activity.id"
-                                class="hover:bg-slate-50 dark:hover:bg-slate-900 cursor-pointer transition"
-                                @click="$inertia.get(route('activities.show', activity.id))"
+                                :class="[
+                                    'activity-row hover:bg-slate-50 dark:hover:bg-slate-900 cursor-pointer transition',
+                                    hasEntered && 'activity-row-visible'
+                                ]"
+                                :style="{ '--ar-i': idx }"
+                                @click="goToActivity(activity.id)"
                             >
                                 <td class="px-4 py-3">
                                     <div class="flex items-center gap-2">
@@ -146,7 +230,10 @@ const props = defineProps({
                                     </div>
                                 </td>
                             </tr>
-                            <tr v-if="!activities.data || activities.data.length === 0">
+                            <tr
+                                v-if="!activities.data || activities.data.length === 0"
+                                :class="['activity-row', hasEntered && 'activity-row-visible']"
+                            >
                                 <td
                                     colspan="3"
                                     class="px-4 py-4 text-center text-xs text-slate-500"
@@ -175,7 +262,7 @@ const props = defineProps({
                             type="button"
                             class="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 disabled:opacity-50 dark:border-slate-700 dark:text-slate-200"
                             :disabled="!activities.prev_page_url"
-                            @click="$inertia.get(activities.prev_page_url)"
+                            @click="goToPage(activities.prev_page_url)"
                         >
                             Previous
                         </button>
@@ -183,7 +270,7 @@ const props = defineProps({
                             type="button"
                             class="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 disabled:opacity-50 dark:border-slate-700 dark:text-slate-200"
                             :disabled="!activities.next_page_url"
-                            @click="$inertia.get(activities.next_page_url)"
+                            @click="goToPage(activities.next_page_url)"
                         >
                             Next
                         </button>
@@ -193,3 +280,92 @@ const props = defineProps({
         </div>
     </AuthenticatedLayout>
 </template>
+
+<style scoped>
+.activity-section {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.4s ease-out, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.activity-section-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.activity-row {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.35s ease-out, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: calc(40ms + (var(--ar-i, 0) * 25ms));
+}
+.activity-row-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.activity-loader {
+    position: relative;
+    width: 88px;
+    height: 88px;
+}
+
+.activity-loader-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    border-top-color: rgba(14, 165, 233, 0.95);
+    border-right-color: rgba(99, 102, 241, 0.5);
+    animation: activity-loader-spin 0.9s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+    will-change: transform;
+}
+
+.activity-loader-ring-2 {
+    inset: 10px;
+    border-top-color: rgba(168, 85, 247, 0.9);
+    border-right-color: rgba(14, 165, 233, 0.45);
+    animation-duration: 1.2s;
+    animation-direction: reverse;
+}
+
+.activity-loader-ring-3 {
+    inset: 20px;
+    border-top-color: rgba(99, 102, 241, 0.95);
+    border-right-color: rgba(168, 85, 247, 0.45);
+    animation-duration: 1.5s;
+}
+
+.activity-loader-core {
+    position: absolute;
+    inset: 50%;
+    transform: translate(-50%, -50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: activity-loader-pulse 1s ease-in-out infinite;
+    will-change: transform, opacity;
+}
+</style>
+
+<style>
+@keyframes activity-loader-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes activity-loader-pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+        opacity: 0.9;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+}
+</style>
