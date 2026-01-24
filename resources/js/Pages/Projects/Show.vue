@@ -139,22 +139,24 @@ const importItems = () => {
                         </p>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                    <a
-                        :href="route('projects.export-items', project.id)"
-                        class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-emerald-700 dark:to-teal-700"
-                    >
-                        <i class="fa-solid fa-download"></i>
-                        Export CSV
-                    </a>
+                    <template v-if="$page.props.auth.user.role !== 'entry_user'">
+                        <a
+                            :href="route('projects.export-items', project.id)"
+                            class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-emerald-700 dark:to-teal-700"
+                        >
+                            <i class="fa-solid fa-download"></i>
+                            Export CSV
+                        </a>
+                        <Link
+                            :href="route('projects.print', project.id)"
+                            class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-sky-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-blue-700 dark:to-sky-700"
+                        >
+                            <i class="fa-solid fa-print"></i>
+                            Print
+                        </Link>
+                    </template>
                     <Link
-                        :href="route('projects.print', project.id)"
-                        class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-sky-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-blue-700 dark:to-sky-700"
-                    >
-                        <i class="fa-solid fa-print"></i>
-                        Print
-                    </Link>
-                    <Link
-                        v-if="$page.props.auth.user.role === 'super_admin'"
+                        v-if="$page.props.auth.user.role === 'super_admin' || ($page.props.auth.user.role === 'entry_user' && project.created_by === $page.props.auth.user.id)"
                         :href="route('projects.edit', project.id)"
                         class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-600 to-orange-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-amber-700 dark:to-orange-700"
                     >
@@ -162,7 +164,7 @@ const importItems = () => {
                         Edit
                     </Link>
                     <button
-                        v-if="$page.props.auth.user.role === 'super_admin'"
+                        v-if="$page.props.auth.user.role === 'super_admin' || ($page.props.auth.user.role === 'entry_user' && project.created_by === $page.props.auth.user.id)"
                         type="button"
                         class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-rose-600 to-red-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-rose-700 dark:to-red-800"
                         @click="deleteProject"
@@ -399,6 +401,16 @@ const importItems = () => {
                         Cancel
                     </button>
                     <button
+                        v-if="$page.props.auth.user.role === 'entry_user' && project.created_by === $page.props.auth.user.id"
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 px-6 py-2.5 text-sm font-medium text-white shadow-md transition hover:shadow-lg"
+                        @click="finalDeleteConfirm"
+                    >
+                        <i class="fa-solid fa-trash"></i>
+                        Delete Project
+                    </button>
+                    <button
+                        v-else
                         type="button"
                         class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 px-6 py-2.5 text-sm font-medium text-white shadow-md transition hover:shadow-lg"
                         @click="proceedToPasswordVerification"

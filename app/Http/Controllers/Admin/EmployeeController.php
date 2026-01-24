@@ -229,8 +229,11 @@ class EmployeeController extends Controller
     public function assignItem(Request $request, Employee $employee): RedirectResponse
     {
         $user = $request->user();
+
         if ($user->isEntryUser()) {
-            abort(403, 'Entry users cannot assign items to employees.');
+            if ($employee->created_by !== $user->id) {
+                abort(403, 'You can only assign items to your own employees.');
+            }
         }
 
         $validated = $request->validate([
@@ -240,11 +243,14 @@ class EmployeeController extends Controller
 
         $assignedCount = 0;
         $alreadyAssigned = [];
-        
+
         foreach ($validated['item_ids'] as $itemId) {
             $item = Item::findOrFail($itemId);
 
-            // Check if item is already assigned to any employee
+            if ($user->isEntryUser() && $item->created_by !== $user->id) {
+                continue;
+            }
+
             $existingAssignment = ItemEmployeeAssignment::where('item_id', $item->id)->first();
 
             if ($existingAssignment) {
@@ -252,13 +258,12 @@ class EmployeeController extends Controller
                 continue;
             }
 
-            // Create assignment
             ItemEmployeeAssignment::create([
                 'item_id' => $item->id,
                 'employee_id' => $employee->id,
                 'project_id' => null,
             ]);
-            
+
             $assignedCount++;
         }
 
@@ -281,11 +286,13 @@ class EmployeeController extends Controller
     public function unassignItem(Request $request, Employee $employee, ItemEmployeeAssignment $assignment): RedirectResponse
     {
         $user = $request->user();
+
         if ($user->isEntryUser()) {
-            abort(403, 'Entry users cannot unassign items.');
+            if ($employee->created_by !== $user->id) {
+                abort(403, 'You can only unassign items from your own employees.');
+            }
         }
 
-        // Verify the assignment belongs to this employee
         if ($assignment->employee_id !== $employee->id) {
             abort(403);
         }

@@ -22,18 +22,21 @@ class DashboardController extends Controller
                 $projectsQuery = Project::query();
                 $itemsQuery = Item::query();
                 $employeesQuery = Employee::query();
+            } elseif ($user->isEntryUser()) {
+                $projectsQuery = Project::where('created_by', $user->id);
+                $itemsQuery = Item::where('created_by', $user->id);
+                $employeesQuery = Employee::where('created_by', $user->id);
             } else {
                 $projectIds = $user->projects()->pluck('projects.id');
 
                 $projectsQuery = Project::whereIn('id', $projectIds);
                 $itemsQuery = Item::whereIn('project_id', $projectIds);
-                // Project managers can see all employees
                 $employeesQuery = Employee::query();
             }
 
-            // For project managers, compute per-project deadlines
+            // For project managers, compute per-project deadlines (not for entry users)
             $projectDeadlines = [];
-            if ($user->isProjectManager()) {
+            if ($user->isProjectManager() && ! $user->isEntryUser()) {
                 $projectDeadlines = $projectsQuery->get()->map(function (Project $project) {
                     $now = now();
 
@@ -63,16 +66,29 @@ class DashboardController extends Controller
             $totalStockItems = $itemsQuery->count();
             $totalDistributedItems = $itemsQuery->whereNotNull('project_id')->count();
 
-            $recentActivities = Activity::with('user')
-                ->latest()
-                ->take(3)
-                ->get();
+            $recentActivitiesQuery = Activity::with('user')->latest();
+            if ($user->isEntryUser()) {
+                $recentActivitiesQuery->where('user_id', $user->id);
+            }
+            $recentActivities = $recentActivitiesQuery->take(3)->get();
 
             $recentEmployees = $employeesQuery->latest()->take(3)->get();
             
             // Get recent items by sequential number instead of creation date
             if ($user->isSuperAdmin()) {
                 $recentItems = Item::getRecentItemsBySequence(3);
+            } elseif ($user->isEntryUser()) {
+                $recentItems = Item::with(['category', 'status', 'project'])
+                    ->where('created_by', $user->id)
+                    ->get()
+                    ->map(function ($item) {
+                        $item->sequential_number = Item::extractSequentialNumber($item->tag_number);
+                        return $item;
+                    })
+                    ->filter(fn($item) => $item->sequential_number !== null)
+                    ->sortByDesc('sequential_number')
+                    ->take(3)
+                    ->values();
             } else {
                 $projectIds = $user->projects()->pluck('projects.id');
                 $recentItems = Item::with(['category', 'status', 'project'])

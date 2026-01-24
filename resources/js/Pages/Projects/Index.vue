@@ -195,7 +195,7 @@ const cancelAllModals = () => {
                                                 <span>Edit</span>
                                             </Link>
                                             <button
-                                                v-if="$page.props.auth.user.role === 'super_admin'"
+                                                v-if="$page.props.auth.user.role === 'super_admin' || ($page.props.auth.user.role === 'entry_user' && project.created_by === $page.props.auth.user.id)"
                                                 type="button"
                                                 @click="deleteProject(project)"
                                                 class="inline-flex items-center gap-1 rounded-md bg-rose-100 px-2 py-1 text-xs font-medium text-rose-700 transition hover:bg-rose-200 dark:bg-rose-900/40 dark:text-rose-300 dark:hover:bg-rose-900/60"
@@ -291,6 +291,16 @@ const cancelAllModals = () => {
                         Cancel
                     </button>
                     <button
+                        v-if="$page.props.auth.user.role === 'entry_user' && projectToDelete && projectToDelete.created_by === $page.props.auth.user.id"
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 px-6 py-2.5 text-sm font-medium text-white shadow-md transition hover:shadow-lg"
+                        @click="finalDeleteConfirm"
+                    >
+                        <i class="fa-solid fa-trash"></i>
+                        Delete Project
+                    </button>
+                    <button
+                        v-else
                         type="button"
                         class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 px-6 py-2.5 text-sm font-medium text-white shadow-md transition hover:shadow-lg"
                         @click="proceedToPasswordVerification"

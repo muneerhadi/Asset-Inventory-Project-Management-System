@@ -101,6 +101,7 @@ const filteredItems = computed(() => {
                 </div>
                 <div class="flex gap-2">
                     <Link
+                        v-if="$page.props.auth.user.role !== 'entry_user'"
                         :href="route('employees.print', employee.id)"
                         class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-sky-600 px-4 py-2.5 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-blue-700 dark:to-sky-700"
                     >
@@ -115,7 +116,7 @@ const filteredItems = computed(() => {
                         Edit
                     </Link>
                     <button
-                        v-if="$page.props.auth.user.role === 'super_admin'"
+                        v-if="$page.props.auth.user.role === 'super_admin' || ($page.props.auth.user.role === 'entry_user' && employee.created_by === $page.props.auth.user.id)"
                         type="button"
                         @click="deleteEmployee"
                         class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-rose-600 to-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-md transition hover:shadow-lg dark:from-rose-700 dark:to-red-800"
