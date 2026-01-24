@@ -310,6 +310,7 @@ const importItems = () => {
                 <div class="rounded-xl border border-slate-200/50 bg-white/70 p-4 shadow-md dark:border-slate-700/50 dark:bg-slate-900/70 dark:backdrop-blur">
                     <div class="flex items-center gap-2">
                         <button
+                            v-if="$page.props.auth.user.role !== 'entry_user'"
                             type="button"
                             @click="showCheckboxes = !showCheckboxes"
                             class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-gray-600 to-slate-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:shadow-lg"
@@ -318,7 +319,7 @@ const importItems = () => {
                             <span>{{ showCheckboxes ? 'Hide Selection' : 'Bulk Delete' }}</span>
                         </button>
                         <button
-                            v-if="selectedItems.length > 0 && showCheckboxes"
+                            v-if="selectedItems.length > 0 && showCheckboxes && $page.props.auth.user.role !== 'entry_user'"
                             type="button"
                             @click="bulkDelete"
                             class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 px-4 py-2 text-sm font-medium text-white shadow-md transition hover:shadow-lg"
@@ -350,7 +351,7 @@ const importItems = () => {
                         <table class="w-full text-sm">
                             <thead>
                                 <tr class="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100 dark:border-slate-700 dark:from-slate-900 dark:to-slate-800">
-                                    <th v-if="showCheckboxes" class="px-4 py-3 text-left cursor-pointer" @click="selectAllItems">
+                                    <th v-if="showCheckboxes && $page.props.auth.user.role !== 'entry_user'" class="px-4 py-3 text-left cursor-pointer" @click="selectAllItems">
                                         <input
                                             type="checkbox"
                                             :checked="selectedItems.length === items.data.length && items.data.length > 0"
@@ -376,7 +377,7 @@ const importItems = () => {
                                     :key="item.id"
                                     class="bg-white transition hover:bg-slate-50 dark:bg-slate-900/50 dark:hover:bg-slate-800/50"
                                 >
-                                    <td v-if="showCheckboxes" class="px-4 py-3">
+                                    <td v-if="showCheckboxes && $page.props.auth.user.role !== 'entry_user'" class="px-4 py-3">
                                         <input
                                             type="checkbox"
                                             :checked="selectedItems.includes(item.id)"
