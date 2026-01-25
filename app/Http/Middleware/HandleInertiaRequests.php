@@ -31,9 +31,14 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
-        $entryUsersCanAddCategories = $user && $user->role === 'entry_user'
-            ? Setting::getBool('entry_users_can_add_categories', false)
-            : false;
+        $entryUsersCanAddCategories = false;
+        if ($user && $user->role === 'entry_user') {
+            try {
+                $entryUsersCanAddCategories = Setting::getBool('entry_users_can_add_categories', false);
+            } catch (\Throwable) {
+                // settings table may not exist yet (e.g. migrations not run on server)
+            }
+        }
 
         return [
             ...parent::share($request),
