@@ -29,6 +29,19 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
+        // #region agent log
+        $logPath = 'c:\Users\hadim\project-asset-inventory-system\project-asset-inventory-system\Hadi project\.cursor\debug.log';
+        $logData = [
+            'sessionId' => 'debug-session',
+            'runId' => 'run_check_version',
+            'hypothesisId' => 'C',
+            'location' => 'AuthenticatedSessionController.php:32',
+            'message' => 'Controller store method reached',
+            'timestamp' => time() * 1000
+        ];
+        @file_put_contents($logPath, json_encode($logData) . PHP_EOL, FILE_APPEND);
+        // #endregion
+
         $request->authenticate();
 
         $request->session()->regenerate();

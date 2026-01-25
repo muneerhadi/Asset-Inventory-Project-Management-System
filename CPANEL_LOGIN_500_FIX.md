@@ -117,6 +117,24 @@ If it points to the project root (where `artisan` and `.env` are), routing and `
 
 Laravel 11 requires PHP 8.2 or higher. In cPanel → **Select PHP Version** (or **MultiPHP Manager**), set the app’s domain to PHP 8.2+.
 
+### "This password does not use the Bcrypt algorithm"
+
+This happens when a user’s `password` in the database is **not** a Bcrypt hash (e.g. plain text, MD5, or imported from another system). Laravel expects Bcrypt (`$2y$...`).
+
+**1. Find affected users** (in cPanel Terminal, from the project root):
+
+```bash
+php artisan user:list-invalid-passwords
+```
+
+**2. Reset password for a user**:
+
+```bash
+php artisan user:reset-password "user@example.com" "NewSecurePassword123"
+```
+
+Then have the user log in with the new password. They can change it later in the app.
+
 ---
 
 ## 3. Optional: use file session and file cache
