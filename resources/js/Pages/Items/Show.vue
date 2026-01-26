@@ -7,7 +7,7 @@ import { resolveImage } from '@/utils/imageResolver';
 
 const props = defineProps({
     item: Object,
-});
+}); 
 
 const showImageModal = ref(false);
 const selectedImageIndex = ref(0);
