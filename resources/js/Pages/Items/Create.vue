@@ -5,7 +5,7 @@ import { ref } from 'vue';
 
 const props = defineProps({
     categories: Array,
-    statuses: Array,
+    statuses: Array, 
     currencies: Array,
     projects: Array,
     nextSequentialNumber: Number,
