@@ -8,7 +8,7 @@ const props = defineProps({
     item: Object,
     categories: Array,
     statuses: Array,
-    currencies: Array,
+    currencies: Array, 
     projects: Array,
 });
 
