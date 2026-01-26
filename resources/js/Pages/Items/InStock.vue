@@ -6,7 +6,7 @@ import { formatDate } from '@/utils/dateFormat';
 const props = defineProps({
     items: Object,
 });
-</script>
+</script> 
 
 <template>
     <Head title="In Stock Items" />
