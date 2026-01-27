@@ -11,13 +11,13 @@ Artisan::command('inspire', function () {
 
 /**
  * Reset a user's password. Use when a user has "This password does not use the Bcrypt algorithm."
- * Run on server: php artisan user:reset-password "user@example.com" "NewSecurePassword123"
+ * Run on server: php artisan user:reset-password "user@example.com" "NewSecurePassword123" 
  */
 Artisan::command('user:reset-password {email : The user email} {password : The new password}', function () {
     $email = $this->argument('email');
-    $newPassword = $this->argument('password');
+    $newPassword = $this->argument('password'); 
 
-    $updated = DB::table('users')->where('email', $email)->update([
+    $updated = DB::table('users')->where('email', $email)->update([ 
         'password' => Hash::make($newPassword),
     ]);
 
