@@ -11,13 +11,13 @@ use App\Http\Controllers\Admin\SearchController;
 use App\Http\Controllers\Admin\SettingsController;
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/login');
+Route::redirect('/', '/login'); 
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () { 
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
 
-    // Items, employees, projects: super_admin, project_manager, entry_user (entry_user has ownership restrictions in controllers)
+    // Items, employees, projects: super_admin, project_manager, entry_user (entry_user has ownership restrictions in controllers) 
     Route::middleware('role:super_admin,project_manager,entry_user')->group(function () {
         Route::resource('items', ItemController::class);
         Route::post('items/import', [ItemController::class, 'import'])->name('items.import');
