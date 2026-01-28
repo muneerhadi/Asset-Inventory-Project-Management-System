@@ -4,11 +4,11 @@ namespace Database\Seeders;
 
 use App\Models\Currency;
 use App\Models\Employee;
-use App\Models\Item;
+use App\Models\Item; 
 use App\Models\ItemCategory;
 use App\Models\ItemStatus;
 use App\Models\Project;
-use App\Models\User;
+use App\Models\User; 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
