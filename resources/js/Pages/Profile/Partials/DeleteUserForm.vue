@@ -15,19 +15,19 @@ const isSuperAdmin = computed(() => page.props.auth?.user?.role === 'super_admin
 const confirmingUserDeletion = ref(false);
 const passwordInput = ref(null);
 
-const form = useForm({
+const form = useForm({ 
     password: '',
 });
-
+ 
 const confirmUserDeletion = () => {
     confirmingUserDeletion.value = true;
 
-    nextTick(() => passwordInput.value.focus());
+    nextTick(() => passwordInput.value.focus()); 
 };
 
 const deleteUser = () => {
     form.delete(route('profile.destroy'), {
-        preserveScroll: true,
+        preserveScroll: true, 
         onSuccess: () => closeModal(),
         onError: () => passwordInput.value.focus(),
         onFinish: () => form.reset(),
