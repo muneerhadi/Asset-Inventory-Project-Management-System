@@ -195,27 +195,27 @@ const getSelectedStatuses = () => {
                                 </tr>
                                 <tr v-if="!items || items.length === 0">
                                     <td colspan="9" class="border-2 border-slate-900 px-4 py-4 text-center font-medium">
-                                        No items match the selected filters.
+                                        No items match the selected filters. 
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                </div>
+                </div> 
             </div>
         </div>
-    </AuthenticatedLayout>
+    </AuthenticatedLayout> 
 </template>
 
 <style scoped>
 @page {
     margin: 0.5in;
     size: A4;
-}
+} 
 
 @media print {
     .print\:hidden {
-        display: none !important;
+        display: none !important; 
     }
     
     body {
