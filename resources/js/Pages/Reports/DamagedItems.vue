@@ -12,13 +12,13 @@ const currency = ref('USD');
 
 const summary = computed(() => {
     const toCode = (i) => (i?.currency?.code || '').toUpperCase();
-    const usdItems = props.items.filter(i => toCode(i) === 'USD');
-    const afgItems = props.items.filter(i => toCode(i) === 'AFG');
-    const sum = (arr) => arr.reduce((s, i) => s + (parseFloat(i?.price) || 0), 0);
+    const usdItems = props.items.filter(i => toCode(i) === 'USD'); 
+    const afgItems = props.items.filter(i => toCode(i) === 'AFG'); 
+    const sum = (arr) => arr.reduce((s, i) => s + (parseFloat(i?.price) || 0), 0); 
     return {
         total_damaged: props.items.length,
         usd: { count: usdItems.length, total: sum(usdItems) },
-        afg: { count: afgItems.length, total: sum(afgItems) },
+        afg: { count: afgItems.length, total: sum(afgItems) }, 
     };
 });
 
