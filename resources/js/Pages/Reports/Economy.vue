@@ -10,13 +10,13 @@ const props = defineProps({
 
 const currency = ref('USD');
 
-const printPage = () => {
-    window.print();
+const printPage = () => { 
+    window.print(); 
 };
 </script>
 
 <style scoped>
-@media print {
+@media print { 
     .print\:hidden {
         display: none !important;
     }
@@ -30,7 +30,7 @@ const printPage = () => {
     /* Hide browser print elements and headers/footers */
     @page {
         margin: 0;
-        margin-top: 0;
+        margin-top: 0; 
         margin-bottom: 0;
     }
     
