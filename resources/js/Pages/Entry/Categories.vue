@@ -11,7 +11,7 @@ const form = useForm({
     description: '',
 });
 
-const submit = () => {
+const submit = () => { 
     form.post(route('entry.categories.store'), {
         onSuccess: () => form.reset(),
     });
