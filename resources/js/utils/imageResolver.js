@@ -16,21 +16,21 @@ export function resolveImage(path) {
     p = p.replace(/\\/g, '/');
 
     // Remove duplicate slashes (except after protocol)
-    p = p.replace(/([^:]\/)\/+/g, '$1');
+    p = p.replace(/([^:]\/)\/+/g, '$1'); 
 
     // Absolute HTTP(S) URL - return as is
-    if (p.startsWith('http://') || p.startsWith('https://')) {
+    if (p.startsWith('http://') || p.startsWith('https://')) { 
         return p;
     }
 
     // Debug logging - check browser console to see image paths
     if (process.env.NODE_ENV === 'development') {
-        console.log('resolveImage - Original:', path, 'Normalized:', p);
+        console.log('resolveImage - Original:', path, 'Normalized:', p); 
     }
 
     // If the path already starts with '/storage/', return as is
-    if (p.startsWith('/storage/')) {
-        return p;
+    if (p.startsWith('/storage/')) { 
+        return p; 
     }
 
     // If the path contains '/storage/', trim everything before it
