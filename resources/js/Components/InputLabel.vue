@@ -4,11 +4,11 @@ defineProps({
         type: String,
     },
 });
-</script>
+</script> 
 
-<template>
+<template> 
     <label class="block text-sm font-medium text-gray-700 dark:text-slate-300">
-        <span v-if="value">{{ value }}</span>
+        <span v-if="value">{{ value }}</span> 
         <span v-else><slot /></span>
-    </label>
+    </label> 
 </template>
